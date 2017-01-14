@@ -69,25 +69,37 @@ class GranuleQuery(object):
 
         iso_8601 = "%Y-%m-%dT%H:%M:%SZ"
 
-        # process each date into an ISO 8601 string
-        dates = [date_from, date_to]
-        for index, date in enumerate(dates):
+        # process each date into a datetime object
+        def convert_to_datetime(date):
+            """
+            Returns a datetime object from an unknown date-like object.
+            """
+
             try:
-                date_as_str = date.strftime(iso_8601)
+                date.strftime(iso_8601)
             except AttributeError:
                 try:
-                    # perhaps it's an ISO 8601 string already
-                    datetime.strptime(date, iso_8601)
-                    date_as_str = date
+                    # try to interpret it as an ISO 8601 string
+                    date = datetime.strptime(date, iso_8601)
                 except TypeError:
                     raise ValueError(
                         "Please provide datetime objects or ISO 8601 formatted strings."
                     )
 
-            # redefine the variable using the string format
-            dates[index] = date_as_str
+            return date
 
-        self.params["temporal[]"] = "{},{}".format(dates[0], dates[1])
+        date_from = convert_to_datetime(date_from)
+        date_to = convert_to_datetime(date_to)
+
+        # can't have the 'from' date be more recent than the 'to' date
+        if date_from > date_to:
+            raise ValueError("date_from must be earlier than date_to.")
+
+        # good to go
+        self.params["temporal[]"] = "{},{}".format(
+            date_from.strftime(iso_8601),
+            date_to.strftime(iso_8601)
+        )
 
         return self
 

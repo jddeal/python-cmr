@@ -48,6 +48,10 @@ class TestGranuleClass(unittest.TestCase):
             query.temporal(1, 2)
             query.temporal(None, None)
 
+        # invalid date order
+        with self.assertRaises(ValueError):
+            query.temporal(datetime(2016, 10, 12, 10, 55, 7), datetime(2016, 10, 12, 9))
+
         # valid parameters
         query.temporal("2016-10-10T01:02:03Z", "2016-10-12T09:08:07Z")
         self.assertIn("temporal[]", query.params)
@@ -57,6 +61,6 @@ class TestGranuleClass(unittest.TestCase):
         self.assertIn("temporal[]", query.params)
         self.assertEqual(query.params["temporal[]"], "2016-10-10T01:02:03Z,2016-10-12T09:00:00Z")
 
-        query.temporal(datetime(2016, 10, 12, 10, 55, 7), datetime(2016, 10, 12, 9))
+        query.temporal(datetime(2016, 10, 12, 10, 55, 7), datetime(2016, 10, 12, 11))
         self.assertIn("temporal[]", query.params)
-        self.assertEqual(query.params["temporal[]"], "2016-10-12T10:55:07Z,2016-10-12T09:00:00Z")
+        self.assertEqual(query.params["temporal[]"], "2016-10-12T10:55:07Z,2016-10-12T11:00:00Z")
