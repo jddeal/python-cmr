@@ -53,7 +53,7 @@ class GranuleQuery(object):
 
         return self
 
-    def temporal(self, date_from, date_to):
+    def temporal(self, date_from, date_to, exclude_boundary=False):
         """
         Set the temporal bounds for the query.
 
@@ -61,6 +61,7 @@ class GranuleQuery(object):
 
         :param date_from: earliest date of temporal range
         :param date_to: latest date of temporal range
+        :param exclude_boundary: whether or not to exclude the date_from/to in the matched range
         :returns: GranueQuery instance
         """
 
@@ -101,6 +102,9 @@ class GranuleQuery(object):
             date_to.strftime(iso_8601)
         )
 
+        if exclude_boundary:
+            self.options["options[temporal][exclude_boundary]"] = True
+
         return self
 
     def execute(self):
@@ -108,13 +112,21 @@ class GranuleQuery(object):
         Execute the query we have built and return the JSON that we are sent
         """
 
+        # encode params
         formatted_params = []
         for key, val in self.params.items():
             formatted_params.append("{}={}".format(key, val))
 
         params_as_string = "&".join(formatted_params)
 
-        url = "{}?{}".format(self.base_url, params_as_string)
+        # encode options
+        formatted_options = []
+        for key, val in self.options.items():
+            formatted_options.append("{}={}".format(key, val))
+
+        options_as_string = "&".join(formatted_options)
+        
+        url = "{}?{}&{}".format(self.base_url, params_as_string, options_as_string)
 
         response = get(url)
         return response.json()
