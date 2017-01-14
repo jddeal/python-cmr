@@ -4,6 +4,7 @@ Module for anything related to Granule searching
 
 from requests import get
 
+
 class GranuleQuery(object):
     """
     Class for querying CMR for Granules
@@ -11,6 +12,7 @@ class GranuleQuery(object):
 
     base_url = "https://cmr.earthdata.nasa.gov/search/granules.json"
     params = {}
+    options = {}
 
     def __init__(self):
         pass
@@ -49,6 +51,22 @@ class GranuleQuery(object):
         self.params['point'] = point
 
         return self
+
+    def temporal(self, date_from, date_to):
+        """
+        Set the temporal bounds for the query.
+
+        Dates should be provided as ISO 8601 formatted strings.
+
+        :param date_from: earliest date of temporal range
+        :param date_to: latest date of temporal range
+        :returns: GranueQuery instance
+        """
+
+        if not date_from or not date_to:
+            return
+
+        self.params["temporal[]"] = "{},{}".format(date_from, date_to)
 
     def execute(self):
         """
