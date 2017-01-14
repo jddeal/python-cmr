@@ -59,8 +59,6 @@ class GranuleQuery(object):
         for key, val in self.params.items():
             formatted_params.append("{}={}".format(key, val))
 
-        # Check for mandatory parameters: Version, ShortName and Point - Throw exception?
-
         params_as_string = "&".join(formatted_params)
 
         url = "{}?{}".format(self.base_url, params_as_string)
