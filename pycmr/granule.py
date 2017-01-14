@@ -2,6 +2,7 @@
 Module for anything related to Granule searching
 """
 
+from datetime import datetime
 from requests import get
 
 
@@ -56,7 +57,7 @@ class GranuleQuery(object):
         """
         Set the temporal bounds for the query.
 
-        Dates should be provided as ISO 8601 formatted strings.
+        Dates can be provided as a datetime objects or ISO 8601 formatted strings.
 
         :param date_from: earliest date of temporal range
         :param date_to: latest date of temporal range
@@ -66,7 +67,29 @@ class GranuleQuery(object):
         if not date_from or not date_to:
             return
 
-        self.params["temporal[]"] = "{},{}".format(date_from, date_to)
+        iso_8601 = "%Y-%m-%dT%H:%M:%SZ"
+
+        # process each date into an ISO 8601 string
+        dates = [date_from, date_to]
+        for index, date in enumerate(dates):
+            try:
+                date_as_str = date.strftime(iso_8601)
+            except AttributeError:
+                try:
+                    # perhaps it's an ISO 8601 string already
+                    datetime.strptime(date, iso_8601)
+                    date_as_str = date
+                except TypeError:
+                    raise ValueError(
+                        "Please provide datetime objects or ISO 8601 formatted strings."
+                    )
+
+            # redefine the variable using the string format
+            dates[index] = date_as_str
+
+        self.params["temporal[]"] = "{},{}".format(dates[0], dates[1])
+
+        return self
 
     def execute(self):
         """
