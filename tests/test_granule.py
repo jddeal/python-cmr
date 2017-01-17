@@ -60,18 +60,18 @@ class TestGranuleClass(unittest.TestCase):
 
         # both strings
         query.temporal("2016-10-10T01:02:03Z", "2016-10-12T09:08:07Z")
-        self.assertIn("temporal[]", query.params)
-        self.assertEqual(query.params["temporal[]"], "2016-10-10T01:02:03Z,2016-10-12T09:08:07Z")
+        self.assertIn("temporal", query.params)
+        self.assertEqual(query.params["temporal"][0], "2016-10-10T01:02:03Z,2016-10-12T09:08:07Z")
 
         # string and datetime
         query.temporal("2016-10-10T01:02:03Z", datetime(2016, 10, 12, 9))
-        self.assertIn("temporal[]", query.params)
-        self.assertEqual(query.params["temporal[]"], "2016-10-10T01:02:03Z,2016-10-12T09:00:00Z")
+        self.assertIn("temporal", query.params)
+        self.assertEqual(query.params["temporal"][1], "2016-10-10T01:02:03Z,2016-10-12T09:00:00Z")
 
         # both datetimes
         query.temporal(datetime(2016, 10, 12, 10, 55, 7), datetime(2016, 10, 12, 11))
-        self.assertIn("temporal[]", query.params)
-        self.assertEqual(query.params["temporal[]"], "2016-10-12T10:55:07Z,2016-10-12T11:00:00Z")
+        self.assertIn("temporal", query.params)
+        self.assertEqual(query.params["temporal"][2], "2016-10-12T10:55:07Z,2016-10-12T11:00:00Z")
 
     def test_temporal_option_set(self):
         query = GranuleQuery()

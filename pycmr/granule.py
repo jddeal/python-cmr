@@ -12,11 +12,10 @@ class GranuleQuery(object):
     """
 
     base_url = "https://cmr.earthdata.nasa.gov/search/granules.json"
-    params = {}
-    options = {}
 
     def __init__(self):
-        pass
+        self.params = {}
+        self.options = {}
 
     def short_name(self, short_name=None):
         """
@@ -55,9 +54,10 @@ class GranuleQuery(object):
 
     def temporal(self, date_from, date_to, exclude_boundary=False):
         """
-        Set the temporal bounds for the query.
+        Add temporal bounds for the query.
 
-        Dates can be provided as a datetime objects or ISO 8601 formatted strings.
+        Dates can be provided as a datetime objects or ISO 8601 formatted strings. Multiple
+        ranges can be provided by successive calls to this method before calling execute().
 
         :param date_from: earliest date of temporal range
         :param date_to: latest date of temporal range
@@ -97,9 +97,14 @@ class GranuleQuery(object):
             raise ValueError("date_from must be earlier than date_to.")
 
         # good to go
-        self.params["temporal[]"] = "{},{}".format(
-            date_from.strftime(iso_8601),
-            date_to.strftime(iso_8601)
+        if "temporal" not in self.params:
+            self.params["temporal"] = []
+
+        self.params["temporal"].append(
+            "{},{}".format(
+                date_from.strftime(iso_8601),
+                date_to.strftime(iso_8601)
+            )
         )
 
         if exclude_boundary:
@@ -117,7 +122,13 @@ class GranuleQuery(object):
         # encode params
         formatted_params = []
         for key, val in self.params.items():
-            formatted_params.append("{}={}".format(key, val))
+
+            # list params require slightly different formatting
+            if isinstance(val, list):
+                for list_val in val:
+                    formatted_params.append("{}[]={}".format(key, list_val))
+            else:
+                formatted_params.append("{}={}".format(key, val))
 
         params_as_string = "&".join(formatted_params)
 
@@ -133,7 +144,7 @@ class GranuleQuery(object):
                         option_key
                     ))
 
-                formatted_options.append("option[{}][{}]={}".format(
+                formatted_options.append("options[{}][{}]={}".format(
                     param_key,
                     option_key,
                     val
