@@ -103,7 +103,9 @@ class GranuleQuery(object):
         )
 
         if exclude_boundary:
-            self.options["options[temporal][exclude_boundary]"] = True
+            self.options["temporal"] = {
+                "exclude_boundary": True
+            }
 
         return self
 
@@ -121,11 +123,24 @@ class GranuleQuery(object):
 
         # encode options
         formatted_options = []
-        for key, val in self.options.items():
-            formatted_options.append("{}={}".format(key, val))
+        for param_key in self.options:
+            for option_key, val in self.options[param_key].items():
+
+                # all CMR options must be booleans
+                if not isinstance(val, bool):
+                    raise ValueError("parameter '{}' with option '{}' must be a boolean".format(
+                        param_key,
+                        option_key
+                    ))
+
+                formatted_options.append("option[{}][{}]={}".format(
+                    param_key,
+                    option_key,
+                    val
+                ))
 
         options_as_string = "&".join(formatted_options)
-        
+
         url = "{}?{}&{}".format(self.base_url, params_as_string, options_as_string)
 
         response = get(url)

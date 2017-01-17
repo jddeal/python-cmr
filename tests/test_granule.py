@@ -35,37 +35,47 @@ class TestGranuleClass(unittest.TestCase):
         self.assertIn(self.point, query.params)
         self.assertEqual(query.params[self.point], self.point_val)
 
-    def test_temporal(self):
+    def test_temporal_invalid_strings(self):
         query = GranuleQuery()
 
-        # invalid string formats
         with self.assertRaises(ValueError):
             query.temporal("2016", "2016-10-20T01:02:03Z")
             query.temporal("2016-10-20T01:02:03Z", "2016")
 
-        # unsupported types
+    def test_temporal_invalid_types(self):
+        query = GranuleQuery()
+
         with self.assertRaises(ValueError):
             query.temporal(1, 2)
             query.temporal(None, None)
 
-        # invalid date order
+    def test_temporal_invalid_date_order(self):
+        query = GranuleQuery()
+
         with self.assertRaises(ValueError):
             query.temporal(datetime(2016, 10, 12, 10, 55, 7), datetime(2016, 10, 12, 9))
 
-        # valid parameters
+    def test_temporal_set(self):
+        query = GranuleQuery()
+
+        # both strings
         query.temporal("2016-10-10T01:02:03Z", "2016-10-12T09:08:07Z")
         self.assertIn("temporal[]", query.params)
         self.assertEqual(query.params["temporal[]"], "2016-10-10T01:02:03Z,2016-10-12T09:08:07Z")
 
+        # string and datetime
         query.temporal("2016-10-10T01:02:03Z", datetime(2016, 10, 12, 9))
         self.assertIn("temporal[]", query.params)
         self.assertEqual(query.params["temporal[]"], "2016-10-10T01:02:03Z,2016-10-12T09:00:00Z")
 
+        # both datetimes
         query.temporal(datetime(2016, 10, 12, 10, 55, 7), datetime(2016, 10, 12, 11))
         self.assertIn("temporal[]", query.params)
         self.assertEqual(query.params["temporal[]"], "2016-10-12T10:55:07Z,2016-10-12T11:00:00Z")
 
-        # make sure options get added
+    def test_temporal_option_set(self):
+        query = GranuleQuery()
+
         query.temporal("2016-10-10T01:02:03Z", "2016-10-12T09:08:07Z", exclude_boundary=True)
-        self.assertIn("options[temporal][exclude_boundary]", query.options)
-        self.assertEqual(query.options["options[temporal][exclude_boundary]"], True)
+        self.assertIn("exclude_boundary", query.options["temporal"])
+        self.assertEqual(query.options["temporal"]["exclude_boundary"], True)
