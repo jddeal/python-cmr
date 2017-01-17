@@ -150,5 +150,5 @@ class GranuleQuery(object):
 
         url = "{}?{}&{}".format(self.base_url, params_as_string, options_as_string)
 
-        response = get(url, verify=False)
+        response = get(url)
         return response.json()
