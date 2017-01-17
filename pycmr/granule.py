@@ -65,47 +65,43 @@ class GranuleQuery(object):
         :returns: GranueQuery instance
         """
 
-        if not date_from or not date_to:
-            return
-
         iso_8601 = "%Y-%m-%dT%H:%M:%SZ"
 
         # process each date into a datetime object
-        def convert_to_datetime(date):
+        def convert_to_string(date):
             """
-            Returns a datetime object from an unknown date-like object.
+            Returns the argument as an ISO 8601 or empty string.
             """
+
+            if not date:
+                return ""
 
             try:
-                date.strftime(iso_8601)
+                # see if it's datetime-like
+                return date.strftime(iso_8601)
             except AttributeError:
                 try:
-                    # try to interpret it as an ISO 8601 string
-                    date = datetime.strptime(date, iso_8601)
+                    # maybe it already is an ISO 8601 string
+                    datetime.strptime(date, iso_8601)
+                    return date
                 except TypeError:
                     raise ValueError(
-                        "Please provide datetime objects or ISO 8601 formatted strings."
+                        "Please provide None, datetime objects, or ISO 8601 formatted strings."
                     )
 
-            return date
+        date_from = convert_to_string(date_from)
+        date_to = convert_to_string(date_to)
 
-        date_from = convert_to_datetime(date_from)
-        date_to = convert_to_datetime(date_to)
+        # if we have both dates, make sure from isn't later than to
+        if date_from and date_to:
+            if date_from > date_to:
+                raise ValueError("date_from must be earlier than date_to.")
 
-        # can't have the 'from' date be more recent than the 'to' date
-        if date_from > date_to:
-            raise ValueError("date_from must be earlier than date_to.")
-
-        # good to go
+        # good to go, make sure we have a param list
         if "temporal" not in self.params:
             self.params["temporal"] = []
 
-        self.params["temporal"].append(
-            "{},{}".format(
-                date_from.strftime(iso_8601),
-                date_to.strftime(iso_8601)
-            )
-        )
+        self.params["temporal"].append("{},{}".format(date_from, date_to))
 
         if exclude_boundary:
             self.options["temporal"] = {
@@ -154,5 +150,5 @@ class GranuleQuery(object):
 
         url = "{}?{}&{}".format(self.base_url, params_as_string, options_as_string)
 
-        response = get(url)
+        response = get(url, verify=False)
         return response.json()
