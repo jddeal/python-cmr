@@ -4,7 +4,7 @@ Module for anything related to Granule searching
 
 from datetime import datetime
 from requests import get
-
+from urllib.parse import quote
 
 class GranuleQuery(object):
     """
@@ -17,6 +17,12 @@ class GranuleQuery(object):
         self.params = {}
         self.options = {}
 
+    def _urlEncodeString(self, input):
+        """
+        Returns a URL-Encoded version of the given input parameter
+        """
+        return quote(input)
+
     def short_name(self, short_name=None):
         """
         Set the shortName of the product we are querying
@@ -26,7 +32,6 @@ class GranuleQuery(object):
             return
 
         self.params['short_name'] = short_name
-
         return self
 
     def version(self, version=None):
@@ -49,7 +54,6 @@ class GranuleQuery(object):
             return
 
         self.params['point'] = point
-
         return self
 
     def temporal(self, date_from, date_to, exclude_boundary=False):
@@ -152,3 +156,69 @@ class GranuleQuery(object):
 
         response = get(url)
         return response.json()
+
+    def downloadable(self, downloadable):
+        """
+        Set the downloadable value for the query.
+
+        Must be of type Boolean
+        """
+        if not isinstance(downloadable, bool):
+            raise TypeError("Downloadable must be of type bool")
+
+        self.params['downloadable'] = downloadable
+
+        return self
+
+    def online_only(self, online_only):
+        """
+        Set the online_only value for the query.
+
+        Must be of type Boolean
+        """
+
+        if not isinstance(online_only, bool):
+            raise TypeError("Online_only must be of type bool")
+
+        self.params['online_only'] = online_only
+
+        return self
+
+    def entry_title(self, entry_title):
+        """
+        Set the entry_title value for the query
+        """
+
+        entry_title = self._urlEncodeString(entry_title)
+
+        self.params['entry_title'] = entry_title
+
+        return self
+
+    def orbit_number(self, orbit_number):
+        """"
+        Set the orbit_number value for the query
+        """
+
+        try:
+            self.params['orbit_number'] = int(orbit_number)
+        except ValueError:
+            self.params['orbit_number'] = self._urlEncodeString(orbit_number)
+
+        return self
+
+    def day_night_flag(self, day_night_flag):
+        """
+        Set the day_night_flag value for the query
+        """
+
+        if not isinstance(day_night_flag, str):
+            raise TypeError("day_night_flag must be of type str.")
+
+        day_night_flag = day_night_flag.lower()
+
+        if day_night_flag not in ['day', 'night', 'unspecified']:
+            raise ValueError("day_night_flag must be day, night or unspecified.")
+
+        self.params['day_night_flag'] = day_night_flag
+        return self
