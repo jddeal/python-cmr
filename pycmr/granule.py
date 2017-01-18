@@ -4,6 +4,7 @@ Module for anything related to Granule searching
 
 from datetime import datetime
 from requests import get
+import urllib
 
 
 class GranuleQuery(object):
@@ -16,6 +17,12 @@ class GranuleQuery(object):
     def __init__(self):
         self.params = {}
         self.options = {}
+
+    def urlEncodeString(self, input):
+        """
+        Returns a URL-Encoded version of the given input parameter
+        """
+        return urllib.parse.quote(input)
 
     def short_name(self, short_name=None):
         """
@@ -47,6 +54,10 @@ class GranuleQuery(object):
 
         if not point:
             return
+
+        # CMR does not support any spaces in the point parameter
+        point = point.replace(' ', '')
+        point = self.urlEncodeString(point)
 
         self.params['point'] = point
 
