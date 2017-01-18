@@ -98,13 +98,12 @@ class TestGranuleClass(unittest.TestCase):
         self.assertIn(self.online_only, query.params)
         self.assertEqual(query.params[self.online_only], True)
 
-
     def test_online_only_invalid(self):
         query = GranuleQuery()
-        query.online_only("Invalid Type")
 
+        with self.assertRaises(TypeError):
+            query.online_only("Invalid Type")
         self.assertNotIn(self.online_only, query.params)
-
 
     def test_downloadable_set(self):
         query = GranuleQuery()
@@ -113,13 +112,12 @@ class TestGranuleClass(unittest.TestCase):
         self.assertIn(self.downloadable, query.params)
         self.assertEqual(query.params[self.downloadable], True)
 
-
     def test_downloadable_invalid(self):
         query = GranuleQuery()
-        query.downloadable("Invalid Type")
 
+        with self.assertRaises(TypeError):
+            query.downloadable("Invalid Type")
         self.assertNotIn(self.downloadable, query.params)
-
 
     def test_entry_title_set(self):
         query = GranuleQuery()
@@ -128,14 +126,12 @@ class TestGranuleClass(unittest.TestCase):
         self.assertIn(self.entry_id, query.params)
         self.assertEqual(query.params[self.entry_id], "DatasetId%205")
 
-
     def test_orbit_number_set(self):
         query = GranuleQuery()
         query.orbit_number(985)
 
         self.assertIn(self.orbit_number, query.params)
         self.assertEqual(query.params[self.orbit_number], 985)
-
 
     def test_orbit_number_encode(self):
         query = GranuleQuery()
@@ -144,14 +140,12 @@ class TestGranuleClass(unittest.TestCase):
         self.assertIn(self.orbit_number, query.params)
         self.assertEqual(query.params[self.orbit_number], "985%2C986")
 
-
     def test_day_night_flag_day_set(self):
         query = GranuleQuery()
         query.day_night_flag('day')
 
         self.assertIn(self.day_night_flag, query.params)
         self.assertEqual(query.params[self.day_night_flag], 'day')
-
 
     def test_day_night_flag_night_set(self):
         query = GranuleQuery()
@@ -160,7 +154,6 @@ class TestGranuleClass(unittest.TestCase):
         self.assertIn(self.day_night_flag, query.params)
         self.assertEqual(query.params[self.day_night_flag], 'night')
 
-
     def test_day_night_flag_unspecified_set(self):
         query = GranuleQuery()
         query.day_night_flag('unspecified')
@@ -168,16 +161,16 @@ class TestGranuleClass(unittest.TestCase):
         self.assertIn(self.day_night_flag, query.params)
         self.assertEqual(query.params[self.day_night_flag], 'unspecified')
 
-
     def test_day_night_flag_invalid_set(self):
         query = GranuleQuery()
-        query.day_night_flag('invaliddaynight')
 
+        with self.assertRaises(ValueError):
+            query.day_night_flag('invaliddaynight')
         self.assertNotIn(self.day_night_flag, query.params)
-
 
     def test_day_night_flag_invalid_type_set(self):
         query = GranuleQuery()
-        query.day_night_flag(True)
 
+        with self.assertRaises(TypeError):
+            query.day_night_flag(True)
         self.assertNotIn(self.day_night_flag, query.params)
