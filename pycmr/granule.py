@@ -3,6 +3,7 @@ Module for anything related to Granule searching
 """
 
 import urllib
+from datetime import datetime
 from requests import get
 
 
@@ -15,6 +16,7 @@ class GranuleQuery(object):
 
     def __init__(self):
         self.params = {}
+        self.options = {}
 
     def short_name(self, short_name=None):
         """
@@ -51,6 +53,107 @@ class GranuleQuery(object):
 
         return self
 
+    def temporal(self, date_from, date_to, exclude_boundary=False):
+        """
+        Add temporal bounds for the query.
+
+        Dates can be provided as a datetime objects or ISO 8601 formatted strings. Multiple
+        ranges can be provided by successive calls to this method before calling execute().
+
+        :param date_from: earliest date of temporal range
+        :param date_to: latest date of temporal range
+        :param exclude_boundary: whether or not to exclude the date_from/to in the matched range
+        :returns: GranueQuery instance
+        """
+
+        iso_8601 = "%Y-%m-%dT%H:%M:%SZ"
+
+        # process each date into a datetime object
+        def convert_to_string(date):
+            """
+            Returns the argument as an ISO 8601 or empty string.
+            """
+
+            if not date:
+                return ""
+
+            try:
+                # see if it's datetime-like
+                return date.strftime(iso_8601)
+            except AttributeError:
+                try:
+                    # maybe it already is an ISO 8601 string
+                    datetime.strptime(date, iso_8601)
+                    return date
+                except TypeError:
+                    raise ValueError(
+                        "Please provide None, datetime objects, or ISO 8601 formatted strings."
+                    )
+
+        date_from = convert_to_string(date_from)
+        date_to = convert_to_string(date_to)
+
+        # if we have both dates, make sure from isn't later than to
+        if date_from and date_to:
+            if date_from > date_to:
+                raise ValueError("date_from must be earlier than date_to.")
+
+        # good to go, make sure we have a param list
+        if "temporal" not in self.params:
+            self.params["temporal"] = []
+
+        self.params["temporal"].append("{},{}".format(date_from, date_to))
+
+        if exclude_boundary:
+            self.options["temporal"] = {
+                "exclude_boundary": True
+            }
+
+        return self
+
+    def execute(self):
+        """
+        Execute the query we have built and return the JSON that we are sent
+        """
+
+        # encode params
+        formatted_params = []
+        for key, val in self.params.items():
+
+            # list params require slightly different formatting
+            if isinstance(val, list):
+                for list_val in val:
+                    formatted_params.append("{}[]={}".format(key, list_val))
+            else:
+                formatted_params.append("{}={}".format(key, val))
+
+        params_as_string = "&".join(formatted_params)
+
+        # encode options
+        formatted_options = []
+        for param_key in self.options:
+            for option_key, val in self.options[param_key].items():
+
+                # all CMR options must be booleans
+                if not isinstance(val, bool):
+                    raise ValueError("parameter '{}' with option '{}' must be a boolean".format(
+                        param_key,
+                        option_key
+                    ))
+
+                formatted_options.append("options[{}][{}]={}".format(
+                    param_key,
+                    option_key,
+                    val
+                ))
+
+        options_as_string = "&".join(formatted_options)
+
+        url = "{}?{}&{}".format(self.base_url, params_as_string, options_as_string)
+
+        response = get(url)
+        return response.json()
+
     def downloadable(self, downloadable):
         """
         Set the downloadable value for the query.
@@ -61,6 +164,7 @@ class GranuleQuery(object):
             return
 
         self.params['downloadable'] = downloadable
+
 
     def online_only(self, online_only):
         """
@@ -74,6 +178,7 @@ class GranuleQuery(object):
 
         self.params['online_only'] = online_only
 
+
     def entry_title(self, entry_title):
         """
         Set the entry_title value for the query
@@ -82,6 +187,7 @@ class GranuleQuery(object):
         entry_title = urllib.parse.quote(entry_title)
 
         self.params['entry_title'] = entry_title
+
 
     def orbit_number(self, orbit_number):
         """"
@@ -93,6 +199,7 @@ class GranuleQuery(object):
         else:
             orbit_number = urllib.parse.quote(orbit_number)
             self.params['orbit_number'] = orbit_number
+
 
     def day_night_flag(self, day_night_flag):
         """
@@ -108,19 +215,3 @@ class GranuleQuery(object):
             return
 
         self.params['day_night_flag'] = day_night_flag
-
-    def execute(self):
-        """
-        Execute the query we have built and return the JSON that we are sent
-        """
-
-        formatted_params = []
-        for key, val in self.params.items():
-            formatted_params.append("{}={}".format(key, val))
-
-        params_as_string = "&".join(formatted_params)
-
-        url = "{}?{}".format(self.base_url, params_as_string)
-
-        response = get(url)
-        return response.json()
