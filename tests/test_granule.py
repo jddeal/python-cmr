@@ -1,5 +1,5 @@
 import unittest
-import urllib
+from urllib.parse import quote, unquote
 from datetime import datetime
 from pycmr.granule import GranuleQuery
 
@@ -34,19 +34,19 @@ class TestGranuleClass(unittest.TestCase):
         query.point(self.point_val)
 
         self.assertIn(self.point, query.params)
-        self.assertEqual(urllib.parse.unquote(query.params[self.point]), urllib.parse.unquote(self.point_val))
+        self.assertEqual(unquote(query.params[self.point]), unquote(self.point_val))
 
     def test_point_encoding(self):
         query = GranuleQuery()
         query.point(self.point_val)
 
-        self.assertEqual(query.params[self.point], urllib.parse.quote(self.point_val))
+        self.assertEqual(query.params[self.point], quote(self.point_val))
 
     def test_point_spaces(self):
         query = GranuleQuery()
         query.point(self.point_space_val)
 
-        self.assertEqual(query.params[self.point], urllib.parse.quote(self.point_val))
+        self.assertEqual(query.params[self.point], quote(self.point_val))
 
     def test_temporal_invalid_strings(self):
         query = GranuleQuery()

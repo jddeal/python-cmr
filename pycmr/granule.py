@@ -4,7 +4,7 @@ Module for anything related to Granule searching
 
 from datetime import datetime
 from requests import get
-import urllib
+from urllib.parse import quote
 
 
 class GranuleQuery(object):
@@ -18,11 +18,11 @@ class GranuleQuery(object):
         self.params = {}
         self.options = {}
 
-    def urlEncodeString(self, input):
+    def _urlEncodeString(self, input):
         """
         Returns a URL-Encoded version of the given input parameter
         """
-        return urllib.parse.quote(input)
+        return quote(input)
 
     def short_name(self, short_name=None):
         """
