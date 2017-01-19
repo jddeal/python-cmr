@@ -2,6 +2,7 @@
 Module for anything related to Granule searching
 """
 
+from urllib.parse import quote
 from datetime import datetime
 from requests import get
 from urllib.parse import quote
@@ -33,7 +34,6 @@ class GranuleQuery(object):
             return
 
         self.params['short_name'] = short_name
-
         return self
 
     def version(self, version=None):
@@ -60,7 +60,6 @@ class GranuleQuery(object):
         point = self.urlEncodeString(point)
 
         self.params['point'] = point
-
         return self
 
     def temporal(self, date_from, date_to, exclude_boundary=False):
@@ -163,3 +162,71 @@ class GranuleQuery(object):
 
         response = get(url)
         return response.json()
+
+    def downloadable(self, downloadable):
+        """
+        Set the downloadable value for the query.
+
+        Must be of type Boolean
+        """
+        if not isinstance(downloadable, bool):
+            raise TypeError("Downloadable must be of type bool")
+
+        self.params['downloadable'] = downloadable
+
+        return self
+
+    def online_only(self, online_only):
+        """
+        Set the online_only value for the query.
+
+        Must be of type Boolean
+        """
+
+        if not isinstance(online_only, bool):
+            raise TypeError("Online_only must be of type bool")
+
+        self.params['online_only'] = online_only
+
+        return self
+
+    def entry_title(self, entry_title):
+        """
+        Set the entry_title value for the query
+        """
+
+        entry_title = self._urlEncodeString(entry_title)
+
+        self.params['entry_title'] = entry_title
+
+        return self
+
+    def orbit_number(self, orbit1, orbit2=None):
+        """"
+        Set the orbit_number value for the query
+        """
+
+        if orbit2:
+            self.params['orbit_number'] = self._urlEncodeString(
+                '{},{}'.format(str(orbit1), str(orbit2))
+            )
+        else:
+            self.params['orbit_number'] = orbit1
+
+        return self
+
+    def day_night_flag(self, day_night_flag):
+        """
+        Set the day_night_flag value for the query
+        """
+
+        if not isinstance(day_night_flag, str):
+            raise TypeError("day_night_flag must be of type str.")
+
+        day_night_flag = day_night_flag.lower()
+
+        if day_night_flag not in ['day', 'night', 'unspecified']:
+            raise ValueError("day_night_flag must be day, night or unspecified.")
+
+        self.params['day_night_flag'] = day_night_flag
+        return self
