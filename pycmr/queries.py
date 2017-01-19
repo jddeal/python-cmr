@@ -1,74 +1,49 @@
 """
-Module for anything related to Granule searching
+Class contains all queries used on CMR
 """
 
 from urllib.parse import quote
+from abc import ABC
 from datetime import datetime
 from requests import get
-from urllib.parse import quote
 
-
-class GranuleQuery(object):
+class Query(ABC):
     """
-    Class for querying CMR for Granules
+    Base class for all queries
     """
 
-    base_url = "https://cmr.earthdata.nasa.gov/search/granules.json"
+    base_url = ""
 
-    def __init__(self):
+    def __init__(self, base_url):
         self.params = {}
         self.options = {}
+        self.base_url = base_url
 
-    def _urlEncodeString(self, input):
+    def _urlencodestring(self, value):
         """
-        Returns a URL-Encoded version of the given input parameter
+        Returns a URL-Encoded version of the given value parameter
         """
-        return quote(input)
+        return quote(value)
 
-    def short_name(self, short_name=None):
+    def online_only(self, online_only):
         """
-        Set the shortName of the product we are querying
-        """
+        Set the online_only value for the query.
 
-        if not short_name:
-            return
-
-        self.params['short_name'] = short_name
-        return self
-
-    def version(self, version=None):
-        """
-        Set the version of the product we are querying
+        Must be of type Boolean
         """
 
-        if not version:
-            return
+        if not isinstance(online_only, bool):
+            raise TypeError("Online_only must be of type bool")
 
-        self.params['version'] = version
-        return self
+        self.params['online_only'] = online_only
 
-    def point(self, point=None):
-        """
-        Set the point of the search we are querying
-        """
-
-        if not point:
-            return
-
-        # CMR does not support any spaces in the point parameter
-        point = point.replace(' ', '')
-        point = self._urlEncodeString(point)
-
-        self.params['point'] = point
         return self
 
     def temporal(self, date_from, date_to, exclude_boundary=False):
         """
         Add temporal bounds for the query.
-
         Dates can be provided as a datetime objects or ISO 8601 formatted strings. Multiple
         ranges can be provided by successive calls to this method before calling execute().
-
         :param date_from: earliest date of temporal range
         :param date_to: latest date of temporal range
         :param exclude_boundary: whether or not to exclude the date_from/to in the matched range
@@ -120,7 +95,68 @@ class GranuleQuery(object):
 
         return self
 
-    def execute(self):
+    def short_name(self, short_name=None):
+        """
+        Set the shortName of the product we are querying
+        """
+
+        if not short_name:
+            return
+
+        self.params['short_name'] = short_name
+        return self
+
+    def version(self, version=None):
+        """
+        Set the version of the product we are querying
+        """
+
+        if not version:
+            return
+
+        self.params['version'] = version
+        return self
+
+    def point(self, point=None):
+        """
+        Set the point of the search we are querying
+        """
+
+        if not point:
+            return
+
+        # CMR does not support any spaces in the point parameter
+        point = point.replace(' ', '')
+        point = self._urlencodestring(point)
+
+        self.params['point'] = point
+        return self
+
+    def downloadable(self, downloadable):
+        """
+        Set the downloadable value for the query.
+
+        Must be of type Boolean
+        """
+        if not isinstance(downloadable, bool):
+            raise TypeError("Downloadable must be of type bool")
+
+        self.params['downloadable'] = downloadable
+
+        return self
+
+    def entry_title(self, entry_title):
+        """
+        Set the entry_title value for the query
+        """
+
+        entry_title = self._urlencodestring(entry_title)
+
+        self.params['entry_title'] = entry_title
+
+        return self
+
+    def query(self):
         """
         Execute the query we have built and return the JSON that we are sent
         """
@@ -163,43 +199,13 @@ class GranuleQuery(object):
         response = get(url)
         return response.json()
 
-    def downloadable(self, downloadable):
-        """
-        Set the downloadable value for the query.
+class GranuleQuery(Query):
+    """
+    Class for querying CMR for Granules
+    """
 
-        Must be of type Boolean
-        """
-        if not isinstance(downloadable, bool):
-            raise TypeError("Downloadable must be of type bool")
-
-        self.params['downloadable'] = downloadable
-
-        return self
-
-    def online_only(self, online_only):
-        """
-        Set the online_only value for the query.
-
-        Must be of type Boolean
-        """
-
-        if not isinstance(online_only, bool):
-            raise TypeError("Online_only must be of type bool")
-
-        self.params['online_only'] = online_only
-
-        return self
-
-    def entry_title(self, entry_title):
-        """
-        Set the entry_title value for the query
-        """
-
-        entry_title = self._urlEncodeString(entry_title)
-
-        self.params['entry_title'] = entry_title
-
-        return self
+    def __init__(self):
+        Query.__init__(self, "https://cmr.earthdata.nasa.gov/search/granules.json")
 
     def orbit_number(self, orbit1, orbit2=None):
         """"
@@ -207,7 +213,7 @@ class GranuleQuery(object):
         """
 
         if orbit2:
-            self.params['orbit_number'] = self._urlEncodeString(
+            self.params['orbit_number'] = self._urlencodestring(
                 '{},{}'.format(str(orbit1), str(orbit2))
             )
         else:
@@ -230,3 +236,21 @@ class GranuleQuery(object):
 
         self.params['day_night_flag'] = day_night_flag
         return self
+
+class CollectionsQuery(Query):
+    """
+    Class for quering CMR for collections
+    """
+
+    def __init__(self):
+        Query.__init__(self, "https://cmr.earthdata.nasa.gov/search/collections.json")
+
+    def first_ten(self):
+        """
+        Returns the first 10 results from a basic CMR collection search.
+        """
+
+        response = get(self.base_url)
+        collections = response.json()["feed"]["entry"]
+
+        return collections
