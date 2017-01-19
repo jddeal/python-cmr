@@ -57,7 +57,7 @@ class GranuleQuery(object):
 
         # CMR does not support any spaces in the point parameter
         point = point.replace(' ', '')
-        point = self.urlEncodeString(point)
+        point = self._urlEncodeString(point)
 
         self.params['point'] = point
         return self
