@@ -135,7 +135,7 @@ class TestGranuleClass(unittest.TestCase):
 
     def test_orbit_number_encode(self):
         query = GranuleQuery()
-        query.orbit_number("985,986")
+        query.orbit_number("985", "986")
 
         self.assertIn(self.orbit_number, query.params)
         self.assertEqual(query.params[self.orbit_number], "985%2C986")

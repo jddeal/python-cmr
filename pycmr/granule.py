@@ -2,9 +2,10 @@
 Module for anything related to Granule searching
 """
 
+from urllib.parse import quote
 from datetime import datetime
 from requests import get
-from urllib.parse import quote
+
 
 class GranuleQuery(object):
     """
@@ -195,15 +196,17 @@ class GranuleQuery(object):
 
         return self
 
-    def orbit_number(self, orbit_number):
+    def orbit_number(self, orbit1, orbit2=None):
         """"
         Set the orbit_number value for the query
         """
 
-        try:
-            self.params['orbit_number'] = int(orbit_number)
-        except ValueError:
-            self.params['orbit_number'] = self._urlEncodeString(orbit_number)
+        if orbit2:
+            self.params['orbit_number'] = self._urlEncodeString(
+                '{},{}'.format(str(orbit1), str(orbit2))
+            )
+        else:
+            self.params['orbit_number'] = orbit1
 
         return self
 
