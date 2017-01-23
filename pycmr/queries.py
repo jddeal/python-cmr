@@ -2,12 +2,15 @@
 Class contains all queries used on CMR
 """
 
-from urllib.parse import quote
-from abc import ABC
+try:
+    from urllib.parse import quote
+except ImportError:
+    from urllib import pathname2url as quote
+
 from datetime import datetime
 from requests import get
 
-class Query(ABC):
+class Query(object):
     """
     Base class for all queries
     """
