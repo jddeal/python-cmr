@@ -1,5 +1,11 @@
 import unittest
-from urllib.parse import quote, unquote
+
+try:
+    from urllib.parse import quote, unquote
+except ImportError:
+    from urllib import pathname2url as quote
+    from urllib import url2pathname as unquote
+
 from datetime import datetime
 from pycmr.queries import GranuleQuery
 
