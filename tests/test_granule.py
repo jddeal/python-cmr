@@ -1,7 +1,7 @@
 import unittest
 from urllib.parse import quote, unquote
 from datetime import datetime
-from pycmr.granule import GranuleQuery
+from pycmr.queries import GranuleQuery
 
 class TestGranuleClass(unittest.TestCase):
 
