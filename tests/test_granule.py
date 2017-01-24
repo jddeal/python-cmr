@@ -26,6 +26,10 @@ class TestGranuleClass(unittest.TestCase):
     entry_id = "entry_title"
     orbit_number = "orbit_number"
     day_night_flag = "day_night_flag"
+    cloud_cover = "cloud_cover"
+    instrument = "instrument"
+    platform = "platform"
+    granule_ur = "granule_ur"
 
     def test_short_name(self):
         query = GranuleQuery()
@@ -193,3 +197,73 @@ class TestGranuleClass(unittest.TestCase):
         with self.assertRaises(TypeError):
             query.day_night_flag(True)
         self.assertNotIn(self.day_night_flag, query.params)
+
+    def test_cloud_cover_min_only(self):
+        query = GranuleQuery()
+        query.cloud_cover(-70)
+
+        self.assertIn(self.cloud_cover, query.params)
+        self.assertEqual(query.params[self.cloud_cover], "-70,100")
+
+    def test_cloud_cover_max_only(self):
+        query = GranuleQuery()
+        query.cloud_cover("", 120)
+
+        self.assertIn(self.cloud_cover, query.params)
+        self.assertEqual(query.params[self.cloud_cover], ",120")
+
+    def test_cloud_cover_all(self):
+        query = GranuleQuery()
+        query.cloud_cover(-70, 120)
+
+        self.assertIn(self.cloud_cover, query.params)
+        self.assertEqual(query.params[self.cloud_cover], "-70,120")
+
+    def test_cloud_cover_none(self):
+        query = GranuleQuery()
+        query.cloud_cover()
+
+        self.assertIn(self.cloud_cover, query.params)
+        self.assertEqual(query.params[self.cloud_cover], "0,100")
+
+    def test_instrument(self):
+        query = GranuleQuery()
+
+        query.instrument("1B")
+
+        self.assertIn(self.instrument, query.params)
+        self.assertEqual(query.params[self.instrument], "1B")
+
+    def test_empty_instrument(self):
+        query = GranuleQuery()
+
+        with self.assertRaises(ValueError):
+            query.instrument(None)
+
+    def test_platform(self):
+        query = GranuleQuery()
+
+        query.platform("1B")
+
+        self.assertIn(self.platform, query.params)
+        self.assertEqual(query.params[self.platform], "1B")
+
+    def test_empty_platform(self):
+        query = GranuleQuery()
+
+        with self.assertRaises(ValueError):
+            query.platform(None)
+
+    def test_granule_ur(self):
+        query = GranuleQuery()
+
+        query.granule_ur("1B")
+
+        self.assertIn(self.granule_ur, query.params)
+        self.assertEqual(query.params[self.granule_ur], "1B")
+
+    def test_empty_granule_ur(self):
+        query = GranuleQuery()
+
+        with self.assertRaises(ValueError):
+            query.granule_ur(None)
