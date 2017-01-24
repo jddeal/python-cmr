@@ -273,6 +273,17 @@ class GranuleQuery(Query):
         self.params['instrument'] = instrument
         return self
 
+    def platform(self, platform=""):
+        """
+        Set the platform value for the query
+        """
+
+        if not platform:
+            raise ValueError("Please provide a value for platform")
+
+        self.params['platform'] = platform
+        return self
+
 class CollectionsQuery(Query):
     """
     Class for quering CMR for collections

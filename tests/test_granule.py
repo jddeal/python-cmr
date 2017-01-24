@@ -28,6 +28,7 @@ class TestGranuleClass(unittest.TestCase):
     day_night_flag = "day_night_flag"
     cloud_cover = "cloud_cover"
     instrument = "instrument"
+    platform = "platform"
 
     def test_short_name(self):
         query = GranuleQuery()
@@ -238,3 +239,16 @@ class TestGranuleClass(unittest.TestCase):
         with self.assertRaises(ValueError):
             query.instrument(None)
 
+    def test_platform(self):
+        query = GranuleQuery()
+
+        query.platform("1B")
+
+        self.assertIn(self.platform, query.params)
+        self.assertEqual(query.params[self.platform], "1B")
+
+    def test_empty_platform(self):
+        query = GranuleQuery()
+
+        with self.assertRaises(ValueError):
+            query.platform(None)
