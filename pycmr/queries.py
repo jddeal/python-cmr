@@ -284,6 +284,17 @@ class GranuleQuery(Query):
         self.params['platform'] = platform
         return self
 
+    def granule_ur(self, granule_ur=""):
+        """
+        Set the granule_ur value for the query
+        """
+
+        if not granule_ur:
+            raise ValueError("Please provide a value for platform")
+
+        self.params['granule_ur'] = granule_ur
+        return self
+
 class CollectionsQuery(Query):
     """
     Class for quering CMR for collections

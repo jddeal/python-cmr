@@ -29,6 +29,7 @@ class TestGranuleClass(unittest.TestCase):
     cloud_cover = "cloud_cover"
     instrument = "instrument"
     platform = "platform"
+    granule_ur = "granule_ur"
 
     def test_short_name(self):
         query = GranuleQuery()
@@ -252,3 +253,17 @@ class TestGranuleClass(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             query.platform(None)
+
+    def test_granule_ur(self):
+        query = GranuleQuery()
+
+        query.granule_ur("1B")
+
+        self.assertIn(self.granule_ur, query.params)
+        self.assertEqual(query.params[self.granule_ur], "1B")
+
+    def test_empty_granule_ur(self):
+        query = GranuleQuery()
+
+        with self.assertRaises(ValueError):
+            query.granule_ur(None)
