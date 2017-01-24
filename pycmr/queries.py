@@ -262,6 +262,17 @@ class GranuleQuery(Query):
         self.params['cloud_cover'] = "{},{}".format(min_cover, max_cover)
         return self
 
+    def instrument(self, instrument=""):
+        """
+        Set the instrument value for the query
+        """
+
+        if not instrument:
+            raise ValueError("Please provide a value for instrument")
+
+        self.params['instrument'] = instrument
+        return self
+
 class CollectionsQuery(Query):
     """
     Class for quering CMR for collections

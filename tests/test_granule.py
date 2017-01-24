@@ -27,6 +27,7 @@ class TestGranuleClass(unittest.TestCase):
     orbit_number = "orbit_number"
     day_night_flag = "day_night_flag"
     cloud_cover = "cloud_cover"
+    instrument = "instrument"
 
     def test_short_name(self):
         query = GranuleQuery()
@@ -219,6 +220,21 @@ class TestGranuleClass(unittest.TestCase):
     def test_cloud_cover_none(self):
         query = GranuleQuery()
         query.cloud_cover()
-        
+
         self.assertIn(self.cloud_cover, query.params)
         self.assertEqual(query.params[self.cloud_cover], "0,100")
+
+    def test_instrument(self):
+        query = GranuleQuery()
+
+        query.instrument("1B")
+
+        self.assertIn(self.instrument, query.params)
+        self.assertEqual(query.params[self.instrument], "1B")
+
+    def test_empty_instrument(self):
+        query = GranuleQuery()
+
+        with self.assertRaises(ValueError):
+            query.instrument(None)
+
