@@ -342,6 +342,60 @@ class GranuleQuery(Query):
         self.params['day_night_flag'] = day_night_flag
         return self
 
+    def cloud_cover(self, min_cover=0, max_cover=100):
+        """
+        Set the cloud cover value for the query
+        """
+
+        if not min_cover and not max_cover:
+            raise ValueError("Please provide at least min_cover, max_cover or both")
+
+        if min_cover and max_cover:
+            try:
+                minimum = float(min_cover)
+                maxiumum = float(max_cover)
+
+                if minimum > maxiumum:
+                    raise ValueError("Please ensure min_cloud_cover is lower than max cloud cover")
+            except ValueError:
+                raise ValueError("Please ensure min_cover and max_cover are both floats")
+
+        self.params['cloud_cover'] = "{},{}".format(min_cover, max_cover)
+        return self
+
+    def instrument(self, instrument=""):
+        """
+        Set the instrument value for the query
+        """
+
+        if not instrument:
+            raise ValueError("Please provide a value for instrument")
+
+        self.params['instrument'] = instrument
+        return self
+
+    def platform(self, platform=""):
+        """
+        Set the platform value for the query
+        """
+
+        if not platform:
+            raise ValueError("Please provide a value for platform")
+
+        self.params['platform'] = platform
+        return self
+
+    def granule_ur(self, granule_ur=""):
+        """
+        Set the granule_ur value for the query
+        """
+
+        if not granule_ur:
+            raise ValueError("Please provide a value for platform")
+
+        self.params['granule_ur'] = granule_ur
+        return self
+
     def _valid_state(self):
 
         # spatial params must be paired with a collection limiting parameter
