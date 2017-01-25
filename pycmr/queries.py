@@ -187,7 +187,7 @@ class Query(object):
         )
 
         return self
-    
+
     def line(self, coordinates):
         """
         Sets a line of coordinates to search over. Must be used in combination with a
