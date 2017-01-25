@@ -137,7 +137,7 @@ class Query(object):
 
     def polygon(self, coordinates):
         """
-        Set's a polygonal area to search over. Must be used in combination with a
+        Sets a polygonal area to search over. Must be used in combination with a
         collection filtering parameter such as short_name or entry_title.
 
         :param coordinates: list of (lon, lat) tuples
@@ -164,6 +164,27 @@ class Query(object):
         as_strs = [str(val) for val in as_floats]
 
         self.params["polygon"] = ",".join(as_strs)
+
+        return self
+
+    def bounding_box(self, lower_left_lon, lower_left_lat, upper_right_lon, upper_right_lat):
+        """
+        Sets a rectangular bounding box to search over. Must be used in combination with
+        a collection filtering parameter such as short_name or entry_title.
+
+        :param lower_left_lon: lower left longitude of the box
+        :param lower_left_lat: lower left latitude of the box
+        :param upper_right_lon: upper right longitude of the box
+        :param upper_right_lat: upper right latitude of the box
+        :returns: Query instance
+        """
+
+        self.params["bounding_box"] = "{},{},{},{}".format(
+            float(lower_left_lon),
+            float(lower_left_lat),
+            float(upper_right_lon),
+            float(upper_right_lat)
+        )
 
         return self
 

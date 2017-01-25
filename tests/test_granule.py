@@ -199,9 +199,8 @@ class TestGranuleClass(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             query.polygon([1, 2, 3])
-            query.polygon([("hey", 1)])
+            query.polygon([("invalid", 1)])
             query.polygon([(1, 1), (2, 1), (1, 1)])
-
 
     def test_polygon_set(self):
         query = GranuleQuery()
@@ -211,3 +210,15 @@ class TestGranuleClass(unittest.TestCase):
 
         query.polygon([("1", 1.1), (2, 1), (2, 2), (1, 1.1)])
         self.assertEqual(query.params["polygon"], "1.0,1.1,2.0,1.0,2.0,2.0,1.0,1.1")
+
+    def test_bounding_box_invalid_set(self):
+        query = GranuleQuery()
+
+        with self.assertRaises(ValueError):
+            query.bounding_box(1, 2, 3, "invalid")
+
+    def test_bounding_box_set(self):
+        query = GranuleQuery()
+
+        query.bounding_box(1, 2, 3, 4)
+        self.assertEqual(query.params["bounding_box"], "1.0,2.0,3.0,4.0")
