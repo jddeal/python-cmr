@@ -225,7 +225,6 @@ class GranuleQuery(Query):
         return self
 
     def day_night_flag(self, day_night_flag):
-
         """
         Set the day_night_flag value for the query
         """
@@ -247,7 +246,7 @@ class GranuleQuery(Query):
         """
 
         if not min_cover and not max_cover:
-            raise ValueError("Please provide atleast min_cover, max_cover or both")
+            raise ValueError("Please provide at least min_cover, max_cover or both")
 
         if min_cover and max_cover:
             try:
@@ -255,7 +254,7 @@ class GranuleQuery(Query):
                 maxiumum = float(max_cover)
 
                 if minimum > maxiumum:
-                    raise ValueError("Please ensure min cloud cover is lower than max cloud cover")
+                    raise ValueError("Please ensure min_cloud_cover is lower than max cloud cover")
             except ValueError:
                 raise ValueError("Please ensure min_cover and max_cover are both floats")
 
