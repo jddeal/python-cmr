@@ -120,19 +120,105 @@ class Query(object):
         self.params['version'] = version
         return self
 
-    def point(self, point=None):
+    def point(self, lon, lat):
         """
-        Set the point of the search we are querying
+        Set the point of the search we are querying.
+
+        :param lon: longitude to search at
+        :param lat: latitude to search at
+        :returns: Query instance
         """
 
-        if not point:
-            return
+        if not lat or not lon:
+            return self
 
-        # CMR does not support any spaces in the point parameter
-        point = point.replace(' ', '')
-        point = self._urlencodestring(point)
+        # coordinates must be a float
+        lon = float(lon)
+        lat = float(lat)
 
-        self.params['point'] = point
+        self.params['point'] = "{},{}".format(lon, lat)
+
+        return self
+
+    def polygon(self, coordinates):
+        """
+        Sets a polygonal area to search over. Must be used in combination with a
+        collection filtering parameter such as short_name or entry_title.
+
+        :param coordinates: list of (lon, lat) tuples
+        :returns: Query instance
+        """
+
+        if not coordinates:
+            return self
+
+        # polygon requires at least 4 pairs of coordinates
+        if len(coordinates) < 4:
+            raise ValueError("A polygon requires at least 4 pairs of coordinates.")
+
+        # convert to floats
+        as_floats = []
+        for lon, lat in coordinates:
+            as_floats.extend([float(lon), float(lat)])
+
+        # last point must match first point to complete polygon
+        if as_floats[0] != as_floats[-2] or as_floats[1] != as_floats[-1]:
+            raise ValueError("Coordinates of the last pair must match the first pair.")
+
+        # convert to strings
+        as_strs = [str(val) for val in as_floats]
+
+        self.params["polygon"] = ",".join(as_strs)
+
+        return self
+
+    def bounding_box(self, lower_left_lon, lower_left_lat, upper_right_lon, upper_right_lat):
+        """
+        Sets a rectangular bounding box to search over. Must be used in combination with
+        a collection filtering parameter such as short_name or entry_title.
+
+        :param lower_left_lon: lower left longitude of the box
+        :param lower_left_lat: lower left latitude of the box
+        :param upper_right_lon: upper right longitude of the box
+        :param upper_right_lat: upper right latitude of the box
+        :returns: Query instance
+        """
+
+        self.params["bounding_box"] = "{},{},{},{}".format(
+            float(lower_left_lon),
+            float(lower_left_lat),
+            float(upper_right_lon),
+            float(upper_right_lat)
+        )
+
+        return self
+
+    def line(self, coordinates):
+        """
+        Sets a line of coordinates to search over. Must be used in combination with a
+        collection filtering parameter such as short_name or entry_title.
+
+        :param coordinates: a list of (lon, lat) tuples
+        :returns: Query instance
+        """
+
+        if not coordinates:
+            return self
+
+        # need at least 2 pairs of coordinates
+        if len(coordinates) < 2:
+            raise ValueError("A line requires at least 2 pairs of coordinates.")
+
+        # make sure they're all floats
+        as_floats = []
+        for lon, lat in coordinates:
+            as_floats.extend([float(lon), float(lat)])
+
+        # cast back to string for join
+        as_strs = [str(val) for val in as_floats]
+
+        self.params["line"] = ",".join(as_strs)
+
         return self
 
     def downloadable(self, downloadable):
@@ -163,6 +249,11 @@ class Query(object):
         """
         Execute the query we have built and return the JSON that we are sent
         """
+
+        # last chance validation for parameters
+        if not self._valid_state():
+            raise RuntimeError(("Spatial parameters must be accompanied by a collection "
+                                "filter (ex: short_name or entry_title)."))
 
         # encode params
         formatted_params = []
@@ -198,9 +289,20 @@ class Query(object):
         options_as_string = "&".join(formatted_options)
 
         url = "{}?{}&{}".format(self.base_url, params_as_string, options_as_string)
-
+        print(url)
         response = get(url)
         return response.json()
+
+    def _valid_state(self):
+        """
+        Determines if the Query is in a valid state based on the parameters and options
+        that have been set. This should be implemented by the subclasses.
+
+        :returns: True if the state is valid, otherwise False
+        """
+
+        raise NotImplementedError()
+
 
 class GranuleQuery(Query):
     """
@@ -294,6 +396,20 @@ class GranuleQuery(Query):
         self.params['granule_ur'] = granule_ur
         return self
 
+    def _valid_state(self):
+
+        # spatial params must be paired with a collection limiting parameter
+        spatial_keys = ["point", "polygon", "bounding_box", "line"]
+        collection_keys = ["short_name", "entry_title"]
+
+        if any(key in self.params for key in spatial_keys):
+            if not any(key in self.params for key in collection_keys):
+                return False
+
+        # all good then
+        return True
+
+
 class CollectionsQuery(Query):
     """
     Class for quering CMR for collections
@@ -311,3 +427,6 @@ class CollectionsQuery(Query):
         collections = response.json()["feed"]["entry"]
 
         return collections
+
+    def _valid_state(self):
+        return True
