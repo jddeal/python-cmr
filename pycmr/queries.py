@@ -135,6 +135,34 @@ class Query(object):
         self.params['point'] = point
         return self
 
+    def polygon(self, coordinates):
+        """
+        Set's a polygonal area to search over. Must be used in combination with a
+        collection filtering parameter such as short_name or entry_title.
+
+        :param coordinates: list of (lon, lat) tuples
+        :returns: Query instance
+        """
+
+        if not coordinates:
+            return self
+
+        # convert to floats
+        as_floats = []
+        for lon, lat in coordinates:
+            as_floats.extend([float(lon), float(lat)])
+
+        # last point must match first point to complete polygon
+        if as_floats[0] != as_floats[-2] or as_floats[1] != as_floats[-1]:
+            raise ValueError("Coordinates of the last pair must match the first pair.")
+
+        # convert to strings
+        as_strs = [str(val) for val in as_floats]
+
+        self.params["polygon"] = ",".join(as_strs)
+
+        return self
+
     def downloadable(self, downloadable):
         """
         Set the downloadable value for the query.
@@ -198,7 +226,7 @@ class Query(object):
         options_as_string = "&".join(formatted_options)
 
         url = "{}?{}&{}".format(self.base_url, params_as_string, options_as_string)
-
+        print(url)
         response = get(url)
         return response.json()
 
