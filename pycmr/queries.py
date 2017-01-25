@@ -149,7 +149,7 @@ class Query(object):
 
         # polygon requires at least 4 pairs of coordinates
         if len(coordinates) < 4:
-            raise ValueError("A polygon requires at least 4 pairs of coordinates")
+            raise ValueError("A polygon requires at least 4 pairs of coordinates.")
 
         # convert to floats
         as_floats = []
@@ -199,6 +199,10 @@ class Query(object):
 
         if not coordinates:
             return self
+
+        # need at least 2 pairs of coordinates
+        if len(coordinates) < 2:
+            raise ValueError("A line requires at least 2 pairs of coordinates.")
 
         # make sure they're all floats
         as_floats = []

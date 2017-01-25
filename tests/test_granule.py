@@ -228,6 +228,7 @@ class TestGranuleClass(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             query.line("invalid")
+            query.line([(1, 1)])
 
     def test_line_set(self):
         query = GranuleQuery()
