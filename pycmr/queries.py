@@ -120,19 +120,24 @@ class Query(object):
         self.params['version'] = version
         return self
 
-    def point(self, point=None):
+    def point(self, lon, lat):
         """
-        Set the point of the search we are querying
+        Set the point of the search we are querying.
+
+        :param lon: longitude to search at
+        :param lat: latitude to search at
+        :returns: Query instance
         """
 
-        if not point:
-            return
+        if not lat or not lon:
+            return self
 
-        # CMR does not support any spaces in the point parameter
-        point = point.replace(' ', '')
-        point = self._urlencodestring(point)
+        # coordinates must be a float
+        lon = float(lon)
+        lat = float(lat)
 
-        self.params['point'] = point
+        self.params['point'] = "{},{}".format(lon, lat)
+
         return self
 
     def polygon(self, coordinates):
