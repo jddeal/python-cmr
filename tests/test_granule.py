@@ -197,13 +197,17 @@ class TestGranuleClass(unittest.TestCase):
     def test_polygon_invalid_set(self):
         query = GranuleQuery()
 
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             query.polygon([1, 2, 3])
             query.polygon([("hey", 1)])
             query.polygon([(1, 1), (2, 1), (1, 1)])
 
+
     def test_polygon_set(self):
         query = GranuleQuery()
-        query.polygon([(1, 1), (2, 1), (2, 2), (1, 1)])
 
+        query.polygon([(1, 1), (2, 1), (2, 2), (1, 1)])
         self.assertEqual(query.params["polygon"], "1.0,1.0,2.0,1.0,2.0,2.0,1.0,1.0")
+
+        query.polygon([("1", 1.1), (2, 1), (2, 2), (1, 1.1)])
+        self.assertEqual(query.params["polygon"], "1.0,1.1,2.0,1.0,2.0,2.0,1.0,1.1")

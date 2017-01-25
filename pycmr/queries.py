@@ -147,6 +147,10 @@ class Query(object):
         if not coordinates:
             return self
 
+        # polygon requires at least 4 pairs of coordinates
+        if len(coordinates) < 4:
+            raise ValueError("A polygon requires at least 4 pairs of coordinates")
+
         # convert to floats
         as_floats = []
         for lon, lat in coordinates:
