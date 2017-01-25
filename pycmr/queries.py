@@ -187,6 +187,30 @@ class Query(object):
         )
 
         return self
+    
+    def line(self, coordinates):
+        """
+        Sets a line of coordinates to search over. Must be used in combination with a
+        collection filtering parameter such as short_name or entry_title.
+
+        :param coordinates: a list of (lon, lat) tuples
+        :returns: Query instance
+        """
+
+        if not coordinates:
+            return self
+
+        # make sure they're all floats
+        as_floats = []
+        for lon, lat in coordinates:
+            as_floats.extend([float(lon), float(lat)])
+
+        # cast back to string for join
+        as_strs = [str(val) for val in as_floats]
+
+        self.params["line"] = ",".join(as_strs)
+
+        return self
 
     def downloadable(self, downloadable):
         """

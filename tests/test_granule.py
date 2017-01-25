@@ -222,3 +222,18 @@ class TestGranuleClass(unittest.TestCase):
 
         query.bounding_box(1, 2, 3, 4)
         self.assertEqual(query.params["bounding_box"], "1.0,2.0,3.0,4.0")
+
+    def test_line_invalid_set(self):
+        query = GranuleQuery()
+
+        with self.assertRaises(ValueError):
+            query.line("invalid")
+
+    def test_line_set(self):
+        query = GranuleQuery()
+
+        query.line([(1, 1), (2, 2)])
+        self.assertEqual(query.params["line"], "1.0,1.0,2.0,2.0")
+
+        query.line([("1", 1.1), (2, 2)])
+        self.assertEqual(query.params["line"], "1.0,1.1,2.0,2.0")
