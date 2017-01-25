@@ -1,11 +1,5 @@
 import unittest
 
-try:
-    from urllib.parse import quote, unquote
-except ImportError:
-    from urllib import pathname2url as quote
-    from urllib import url2pathname as unquote
-
 from datetime import datetime
 from pycmr.queries import GranuleQuery
 
@@ -17,10 +11,7 @@ class TestGranuleClass(unittest.TestCase):
     version_val = "006"
     version = "version"
 
-    point_val = "44.6,-63.6"
     point = "point"
-    point_space_val = '44.6,                                         -63.6'
-
     online_only = "online_only"
     downloadable = "downloadable"
     entry_id = "entry_title"
@@ -41,24 +32,20 @@ class TestGranuleClass(unittest.TestCase):
         self.assertIn(self.version, query.params)
         self.assertEqual(query.params[self.version], self.version_val)
 
-    def test_point(self):
+    def test_point_set(self):
         query = GranuleQuery()
-        query.point(self.point_val)
+
+        query.point(10, 15.1)
 
         self.assertIn(self.point, query.params)
-        self.assertEqual(unquote(query.params[self.point]), unquote(self.point_val))
+        self.assertEqual(query.params[self.point], "10.0,15.1")
 
-    def test_point_encoding(self):
+    def test_point_invalid_set(self):
         query = GranuleQuery()
-        query.point(self.point_val)
 
-        self.assertEqual(query.params[self.point], quote(self.point_val))
-
-    def test_point_spaces(self):
-        query = GranuleQuery()
-        query.point(self.point_space_val)
-
-        self.assertEqual(query.params[self.point], quote(self.point_val))
+        with self.assertRaises(ValueError):
+            query.point("invalid", 15.1)
+            query.point(10, None)
 
     def test_temporal_invalid_strings(self):
         query = GranuleQuery()
@@ -193,3 +180,69 @@ class TestGranuleClass(unittest.TestCase):
         with self.assertRaises(TypeError):
             query.day_night_flag(True)
         self.assertNotIn(self.day_night_flag, query.params)
+
+    def test_polygon_invalid_set(self):
+        query = GranuleQuery()
+
+        with self.assertRaises(ValueError):
+            query.polygon([1, 2, 3])
+            query.polygon([("invalid", 1)])
+            query.polygon([(1, 1), (2, 1), (1, 1)])
+
+    def test_polygon_set(self):
+        query = GranuleQuery()
+
+        query.polygon([(1, 1), (2, 1), (2, 2), (1, 1)])
+        self.assertEqual(query.params["polygon"], "1.0,1.0,2.0,1.0,2.0,2.0,1.0,1.0")
+
+        query.polygon([("1", 1.1), (2, 1), (2, 2), (1, 1.1)])
+        self.assertEqual(query.params["polygon"], "1.0,1.1,2.0,1.0,2.0,2.0,1.0,1.1")
+
+    def test_bounding_box_invalid_set(self):
+        query = GranuleQuery()
+
+        with self.assertRaises(ValueError):
+            query.bounding_box(1, 2, 3, "invalid")
+
+    def test_bounding_box_set(self):
+        query = GranuleQuery()
+
+        query.bounding_box(1, 2, 3, 4)
+        self.assertEqual(query.params["bounding_box"], "1.0,2.0,3.0,4.0")
+
+    def test_line_invalid_set(self):
+        query = GranuleQuery()
+
+        with self.assertRaises(ValueError):
+            query.line("invalid")
+            query.line([(1, 1)])
+
+    def test_line_set(self):
+        query = GranuleQuery()
+
+        query.line([(1, 1), (2, 2)])
+        self.assertEqual(query.params["line"], "1.0,1.0,2.0,2.0")
+
+        query.line([("1", 1.1), (2, 2)])
+        self.assertEqual(query.params["line"], "1.0,1.1,2.0,2.0")
+
+    def test_invalid_spatial_state(self):
+        query = GranuleQuery()
+
+        query.point(1, 2)
+        self.assertFalse(query._valid_state())
+
+        query.polygon([(1, 1), (2, 1), (2, 2), (1, 1)])
+        self.assertFalse(query._valid_state())
+
+        query.bounding_box(1, 1, 2, 2)
+        self.assertFalse(query._valid_state())
+
+        query.line([(1, 1), (2, 2)])
+        self.assertFalse(query._valid_state())
+
+    def test_valid_spatial_state(self):
+        query = GranuleQuery()
+
+        query.point(1, 2).short_name("test")
+        self.assertTrue(query._valid_state())
