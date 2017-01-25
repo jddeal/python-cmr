@@ -238,3 +238,24 @@ class TestGranuleClass(unittest.TestCase):
 
         query.line([("1", 1.1), (2, 2)])
         self.assertEqual(query.params["line"], "1.0,1.1,2.0,2.0")
+
+    def test_invalid_spatial_state(self):
+        query = GranuleQuery()
+
+        query.point("1, 2")
+        self.assertFalse(query._valid_state())
+
+        query.polygon([(1, 1), (2, 1), (2, 2), (1, 1)])
+        self.assertFalse(query._valid_state())
+
+        query.bounding_box(1, 1, 2, 2)
+        self.assertFalse(query._valid_state())
+
+        query.line([(1, 1), (2, 2)])
+        self.assertFalse(query._valid_state())
+
+    def test_valid_spatial_state(self):
+        query = GranuleQuery()
+
+        query.point("1, 2").short_name("test")
+        self.assertTrue(query._valid_state())

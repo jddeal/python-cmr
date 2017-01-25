@@ -245,6 +245,11 @@ class Query(object):
         Execute the query we have built and return the JSON that we are sent
         """
 
+        # last chance validation for parameters
+        if not self._valid_state():
+            raise RuntimeError(("Spatial parameters must be accompanied by a collection "
+                                "filter (ex: short_name or entry_title)."))
+
         # encode params
         formatted_params = []
         for key, val in self.params.items():
@@ -282,6 +287,17 @@ class Query(object):
         print(url)
         response = get(url)
         return response.json()
+
+    def _valid_state(self):
+        """
+        Determines if the Query is in a valid state based on the parameters and options
+        that have been set. This should be implemented by the subclasses.
+
+        :returns: True if the state is valid, otherwise False
+        """
+
+        raise NotImplementedError()
+
 
 class GranuleQuery(Query):
     """
@@ -321,6 +337,20 @@ class GranuleQuery(Query):
         self.params['day_night_flag'] = day_night_flag
         return self
 
+    def _valid_state(self):
+
+        # spatial params must be paired with a collection limiting parameter
+        spatial_keys = ["point", "polygon", "bounding_box", "line"]
+        collection_keys = ["short_name", "entry_title"]
+
+        if any(key in self.params for key in spatial_keys):
+            if not any(key in self.params for key in collection_keys):
+                return False
+
+        # all good then
+        return True
+
+
 class CollectionsQuery(Query):
     """
     Class for quering CMR for collections
@@ -338,3 +368,6 @@ class CollectionsQuery(Query):
         collections = response.json()["feed"]["entry"]
 
         return collections
+
+    def _valid_state(self):
+        return True
