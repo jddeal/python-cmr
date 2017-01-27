@@ -8,7 +8,7 @@ except ImportError:
     from urllib import pathname2url as quote
 
 from datetime import datetime
-from requests import get
+from requests import get, exceptions
 
 class Query(object):
     """
@@ -289,8 +289,13 @@ class Query(object):
         options_as_string = "&".join(formatted_options)
 
         url = "{}?{}&{}".format(self.base_url, params_as_string, options_as_string)
-        print(url)
         response = get(url)
+
+        try:
+            response.raise_for_status()
+        except exceptions.HTTPError as ex:
+            raise RuntimeError(ex.response.text)
+
         return response.json()
 
     def _valid_state(self):
