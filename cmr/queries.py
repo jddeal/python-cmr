@@ -1,5 +1,5 @@
 """
-Class contains all queries used on CMR
+Contains all CMR query types.
 """
 
 try:
@@ -12,7 +12,7 @@ from requests import get, exceptions
 
 class Query(object):
     """
-    Base class for all queries
+    Base class for all CMR queries.
     """
 
     base_url = ""
@@ -24,15 +24,21 @@ class Query(object):
 
     def _urlencodestring(self, value):
         """
-        Returns a URL-Encoded version of the given value parameter
+        Returns a URL-Encoded version of the given value parameter.
+
+        :param value: value to encode
+        :returns: the URL encoded version of value
         """
+
         return quote(value)
 
     def online_only(self, online_only):
         """
-        Set the online_only value for the query.
+        Only match granules that are listed online and not available for download.
+        The opposite of this method is downloadable().
 
-        Must be of type Boolean
+        :param online_only: True to require granules only be online
+        :returns: Query instance
         """
 
         if not isinstance(online_only, bool):
@@ -44,9 +50,11 @@ class Query(object):
 
     def temporal(self, date_from, date_to, exclude_boundary=False):
         """
-        Add temporal bounds for the query.
+        Filter by an open or closed date range.
+        
         Dates can be provided as a datetime objects or ISO 8601 formatted strings. Multiple
         ranges can be provided by successive calls to this method before calling execute().
+
         :param date_from: earliest date of temporal range
         :param date_to: latest date of temporal range
         :param exclude_boundary: whether or not to exclude the date_from/to in the matched range
@@ -100,7 +108,10 @@ class Query(object):
 
     def short_name(self, short_name=None):
         """
-        Set the shortName of the product we are querying
+        Filter by short name (aka product or collection name).
+
+        :param short_name: name of collection
+        :returns: Query instance
         """
 
         if not short_name:
@@ -111,7 +122,11 @@ class Query(object):
 
     def version(self, version=None):
         """
-        Set the version of the product we are querying
+        Filter by version. Note that CMR defines this as a string. For example,
+        MODIS version 6 products must be searched for with "006".
+
+        :param version: version string
+        :returns: Query instance
         """
 
         if not version:
@@ -122,10 +137,10 @@ class Query(object):
 
     def point(self, lon, lat):
         """
-        Set the point of the search we are querying.
+        Filter by granules that include a geographic point.
 
-        :param lon: longitude to search at
-        :param lat: latitude to search at
+        :param lon: longitude of geographic point
+        :param lat: latitude of geographic point
         :returns: Query instance
         """
 
@@ -142,7 +157,7 @@ class Query(object):
 
     def polygon(self, coordinates):
         """
-        Sets a polygonal area to search over. Must be used in combination with a
+        Filter by granules that overlap a polygonal area. Must be used in combination with a
         collection filtering parameter such as short_name or entry_title.
 
         :param coordinates: list of (lon, lat) tuples
@@ -174,7 +189,7 @@ class Query(object):
 
     def bounding_box(self, lower_left_lon, lower_left_lat, upper_right_lon, upper_right_lat):
         """
-        Sets a rectangular bounding box to search over. Must be used in combination with
+        Filter by granules that overlap a bounding box. Must be used in combination with
         a collection filtering parameter such as short_name or entry_title.
 
         :param lower_left_lon: lower left longitude of the box
@@ -195,8 +210,8 @@ class Query(object):
 
     def line(self, coordinates):
         """
-        Sets a line of coordinates to search over. Must be used in combination with a
-        collection filtering parameter such as short_name or entry_title.
+        Filter by granules that overlap a series of connected points. Must be used in combination
+        with a collection filtering parameter such as short_name or entry_title.
 
         :param coordinates: a list of (lon, lat) tuples
         :returns: Query instance
@@ -223,9 +238,11 @@ class Query(object):
 
     def downloadable(self, downloadable):
         """
-        Set the downloadable value for the query.
+        Only match granules that are available for download. The opposite of this
+        method is online_only().
 
-        Must be of type Boolean
+        :param downloadable: True to require granules be downloadable
+        :returns: Query instance
         """
         if not isinstance(downloadable, bool):
             raise TypeError("Downloadable must be of type bool")
@@ -236,7 +253,10 @@ class Query(object):
 
     def entry_title(self, entry_title):
         """
-        Set the entry_title value for the query
+        Filter by the collection entry title.
+
+        :param entry_title: Entry title of the collection
+        :returns: Query instance
         """
 
         entry_title = self._urlencodestring(entry_title)
@@ -247,7 +267,9 @@ class Query(object):
 
     def query(self):
         """
-        Execute the query we have built and return the JSON that we are sent
+        Queries the CMR and return the response as a dictionary.
+
+        :returns: list of dictionaries, with each dictionary describing one granule
         """
 
         # last chance validation for parameters
@@ -296,7 +318,7 @@ class Query(object):
         except exceptions.HTTPError as ex:
             raise RuntimeError(ex.response.text)
 
-        return response.json()
+        return response.json()["feed"]["entry"]
 
     def _valid_state(self):
         """
@@ -311,7 +333,7 @@ class Query(object):
 
 class GranuleQuery(Query):
     """
-    Class for querying CMR for Granules
+    Class for querying granules from the CMR.
     """
 
     def __init__(self):
@@ -319,7 +341,12 @@ class GranuleQuery(Query):
 
     def orbit_number(self, orbit1, orbit2=None):
         """"
-        Set the orbit_number value for the query
+        Filter by the orbit number the granule was acquired during. Either a single
+        orbit can be targeted or a range of orbits.
+        
+        :param orbit1: orbit to target (lower limit of range when orbit2 is provided)
+        :param orbit2: upper limit of range
+        :returns: Query instance
         """
 
         if orbit2:
@@ -333,7 +360,10 @@ class GranuleQuery(Query):
 
     def day_night_flag(self, day_night_flag):
         """
-        Set the day_night_flag value for the query
+        Filter by period of the day the granule was collected during.
+
+        :param day_night_flag: "day", "night", or "unspecified"
+        :returns: Query instance
         """
 
         if not isinstance(day_night_flag, str):
@@ -349,7 +379,11 @@ class GranuleQuery(Query):
 
     def cloud_cover(self, min_cover=0, max_cover=100):
         """
-        Set the cloud cover value for the query
+        Filter by the percentage of cloud cover present in the granule.
+
+        :param min_cover: minimum percentage of cloud cover
+        :param max_cover: maximum percentage of cloud cover
+        :returns: Query instance 
         """
 
         if not min_cover and not max_cover:
@@ -370,7 +404,10 @@ class GranuleQuery(Query):
 
     def instrument(self, instrument=""):
         """
-        Set the instrument value for the query
+        Filter by the instrument associated with the granule.
+
+        :param instrument: name of the instrument
+        :returns: Query instance
         """
 
         if not instrument:
@@ -381,7 +418,10 @@ class GranuleQuery(Query):
 
     def platform(self, platform=""):
         """
-        Set the platform value for the query
+        Filter by the satellite platform the granule came from.
+
+        :param platform: name of the satellite
+        :returns: Query instance
         """
 
         if not platform:
@@ -392,7 +432,11 @@ class GranuleQuery(Query):
 
     def granule_ur(self, granule_ur=""):
         """
-        Set the granule_ur value for the query
+        Filter by the granules unique ID. Note this will result in at most one granule
+        being returned.
+
+        :param granule_ur: UUID of a granule
+        :returns: Query instance
         """
 
         if not granule_ur:
@@ -417,7 +461,7 @@ class GranuleQuery(Query):
 
 class CollectionsQuery(Query):
     """
-    Class for quering CMR for collections
+    Class for querying collections from the CMR. Largely unimplemented.
     """
 
     def __init__(self):
