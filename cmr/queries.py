@@ -106,7 +106,7 @@ class Query(object):
 
         return self
 
-    def short_name(self, short_name=None):
+    def short_name(self, short_name):
         """
         Filter by short name (aka product or collection name).
 
@@ -115,12 +115,12 @@ class Query(object):
         """
 
         if not short_name:
-            return
+            return self
 
         self.params['short_name'] = short_name
         return self
 
-    def version(self, version=None):
+    def version(self, version):
         """
         Filter by version. Note that CMR defines this as a string. For example,
         MODIS version 6 products must be searched for with "006".
@@ -130,7 +130,7 @@ class Query(object):
         """
 
         if not version:
-            return
+            return self
 
         self.params['version'] = version
         return self
