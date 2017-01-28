@@ -1,7 +1,7 @@
 import unittest
 
 from datetime import datetime
-from pycmr.queries import GranuleQuery
+from cmr.queries import GranuleQuery
 
 class TestGranuleClass(unittest.TestCase):
 
