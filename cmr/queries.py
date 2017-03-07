@@ -10,6 +10,7 @@ except ImportError:
 from datetime import datetime
 from requests import get, exceptions
 
+
 class Query(object):
     """
     Base class for all CMR queries.
@@ -21,6 +22,34 @@ class Query(object):
         self.params = {}
         self.options = {}
         self.base_url = base_url
+
+    @classmethod
+    def get(cls, url, limit=100):
+        """
+        Get all results up to some limit, even if spanning multiple pages
+
+        :param url: The complete URL to query
+        :limit: The number of results to return
+        :returns: Results concatenated
+        """
+        page_size = min(limit, 2000)
+
+        results = []
+        page = 1
+        while len(results) < limit:
+            resp = get(url, params={'page_size': page_size, 'page_num': page})
+
+            try:
+                resp.raise_for_status()
+            except exceptions.HTTPError as ex:
+                raise RuntimeError(ex.response.text)
+            latest = resp.json()['feed']['entry']
+            if len(latest) == 0:
+                break
+
+            results = results + latest
+            page += 1
+        return results[0:limit]
 
     def _urlencodestring(self, value):
         """
@@ -51,7 +80,7 @@ class Query(object):
     def temporal(self, date_from, date_to, exclude_boundary=False):
         """
         Filter by an open or closed date range.
-        
+
         Dates can be provided as a datetime objects or ISO 8601 formatted strings. Multiple
         ranges can be provided by successive calls to this method before calling execute().
 
@@ -265,7 +294,7 @@ class Query(object):
 
         return self
 
-    def query(self):
+    def query(self, limit=100):
         """
         Queries the CMR and return the response as a dictionary.
 
@@ -311,14 +340,9 @@ class Query(object):
         options_as_string = "&".join(formatted_options)
 
         url = "{}?{}&{}".format(self.base_url, params_as_string, options_as_string)
-        response = get(url)
+        results = self.get(url, limit=limit)
 
-        try:
-            response.raise_for_status()
-        except exceptions.HTTPError as ex:
-            raise RuntimeError(ex.response.text)
-
-        return response.json()["feed"]["entry"]
+        return results
 
     def _valid_state(self):
         """
@@ -343,7 +367,7 @@ class GranuleQuery(Query):
         """"
         Filter by the orbit number the granule was acquired during. Either a single
         orbit can be targeted or a range of orbits.
-        
+
         :param orbit1: orbit to target (lower limit of range when orbit2 is provided)
         :param orbit2: upper limit of range
         :returns: Query instance
@@ -383,7 +407,7 @@ class GranuleQuery(Query):
 
         :param min_cover: minimum percentage of cloud cover
         :param max_cover: maximum percentage of cloud cover
-        :returns: Query instance 
+        :returns: Query instance
         """
 
         if not min_cover and not max_cover:
@@ -472,10 +496,9 @@ class CollectionsQuery(Query):
         Returns the first 10 results from a basic CMR collection search.
         """
 
-        response = get(self.base_url)
-        collections = response.json()["feed"]["entry"]
+        results = self.get(self.base_url, limit=10)
 
-        return collections
+        return results
 
     def _valid_state(self):
         return True
