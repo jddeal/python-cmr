@@ -49,7 +49,7 @@ class Query(object):
 
             results = results + latest
             page += 1
-        return results[0:limit]
+        return results
 
     def _urlencodestring(self, value):
         """
