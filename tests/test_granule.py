@@ -320,3 +320,11 @@ class TestGranuleClass(unittest.TestCase):
 
         query.point(1, 2).short_name("test")
         self.assertTrue(query._valid_state())
+
+    def _test_query(self):
+        """ Test real query """
+        query = GranuleQuery()
+        query.short_name('MCD43A4').version('005')
+        query.temporal(datetime(2016, 1, 1), datetime(2016, 1, 1))
+        results = query.query(limit=10)
+        self.assertEqual(len(results), 10)
