@@ -78,17 +78,6 @@ class Query(object):
         
         return int(response.headers["CMR-Hits"])
 
-
-    def _urlencodestring(self, value):
-        """
-        Returns a URL-Encoded version of the given value parameter.
-
-        :param value: value to encode
-        :returns: the URL encoded version of value
-        """
-
-        return quote(value)
-
     def online_only(self, online_only):
         """
         Only match granules that are listed online and not available for download.
@@ -316,7 +305,7 @@ class Query(object):
         :returns: Query instance
         """
 
-        entry_title = self._urlencodestring(entry_title)
+        entry_title = quote(entry_title)
 
         self.params['entry_title'] = entry_title
 
@@ -399,9 +388,7 @@ class GranuleQuery(Query):
         """
 
         if orbit2:
-            self.params['orbit_number'] = self._urlencodestring(
-                '{},{}'.format(str(orbit1), str(orbit2))
-            )
+            self.params['orbit_number'] = quote('{},{}'.format(str(orbit1), str(orbit2)))
         else:
             self.params['orbit_number'] = orbit1
 
