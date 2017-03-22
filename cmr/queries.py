@@ -23,16 +23,16 @@ class Query(object):
         self.options = {}
         self.base_url = base_url
 
-    @classmethod
-    def get(cls, url, limit=100):
+    def get(self, limit=2000):
         """
-        Get all results up to some limit, even if spanning multiple pages
+        Get all results up to some limit, even if spanning multiple pages.
 
-        :param url: The complete URL to query
         :limit: The number of results to return
         :returns: Results concatenated
         """
+
         page_size = min(limit, 2000)
+        url = self._build_url()
 
         results = []
         page = 1
@@ -43,12 +43,14 @@ class Query(object):
                 resp.raise_for_status()
             except exceptions.HTTPError as ex:
                 raise RuntimeError(ex.response.text)
+
             latest = resp.json()['feed']['entry']
             if len(latest) == 0:
                 break
 
             results = results + latest
             page += 1
+
         return results
 
     def _urlencodestring(self, value):
@@ -294,11 +296,11 @@ class Query(object):
 
         return self
 
-    def query(self, limit=100):
+    def _build_url(self):
         """
-        Queries the CMR and return the response as a dictionary.
+        Builds the URL that will be used to query CMR.
 
-        :returns: list of dictionaries, with each dictionary describing one granule
+        :returns: the url as a string
         """
 
         # last chance validation for parameters
@@ -339,10 +341,7 @@ class Query(object):
 
         options_as_string = "&".join(formatted_options)
 
-        url = "{}?{}&{}".format(self.base_url, params_as_string, options_as_string)
-        results = self.get(url, limit=limit)
-
-        return results
+        return "{}?{}&{}".format(self.base_url, params_as_string, options_as_string)
 
     def _valid_state(self):
         """
