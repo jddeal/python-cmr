@@ -88,14 +88,22 @@ the wrapper. The following shows the possible parameters supported by the wrappe
     >>> api.instrument("MODIS")
     >>> api.platform("Terra")
 
-    # determine the number of results the query will return (without downloading all the granules)
+
+To work with the inspecting and retreiving results from the API, the following methods are available:
+
+.. code-block:: python
+
+    # inspect the number of results the query will return without downloading the results
     >>> print(api.hits())
 
     # retrieve 100 granules
     >>> granules = api.get(100)
 
-    # retrieve 25,000 granules - this will make multiple API calls as only 2000 can be retrieved in one call
+    # retrieve 25,000 granules
     >>> granules = api.get(25000)
+
+    # retrieve all the granules possible for the query
+    >>> granules = api.get_all()  # this is a shortcut for api.get(api.hits())
 
 
 Installation
