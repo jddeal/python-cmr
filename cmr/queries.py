@@ -28,7 +28,7 @@ class Query(object):
         Get all results up to some limit, even if spanning multiple pages.
 
         :limit: The number of results to return
-        :returns: Results concatenated
+        :returns: query results as a list
         """
 
         page_size = min(limit, 2000)
@@ -77,6 +77,18 @@ class Query(object):
             raise RuntimeError(ex.response.text)
         
         return int(response.headers["CMR-Hits"])
+    
+    def get_all(self):
+        """
+        Returns all of the results for the query. This will call hits() first to determine how many
+        results their are, and then calls get() with that number. This method could take quite
+        awhile if many requests have to be made.
+
+        :returns: query results as a list
+        """
+
+        return self.get(self.hits())
+
 
     def online_only(self, online_only):
         """
