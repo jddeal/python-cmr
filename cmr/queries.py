@@ -37,14 +37,20 @@ class Query(object):
         results = []
         page = 1
         while len(results) < limit:
-            resp = get(url, params={'page_size': page_size, 'page_num': page})
+            
+            # cut page_size down if this is the last iteration and we need less than the
+            # full page_size of results to reach the limit
+            if limit - len(results) < page_size:
+                page_size = limit - len(results)
+
+            response = get(url, params={'page_size': page_size, 'page_num': page}, verify=False)
 
             try:
-                resp.raise_for_status()
+                response.raise_for_status()
             except exceptions.HTTPError as ex:
                 raise RuntimeError(ex.response.text)
 
-            latest = resp.json()['feed']['entry']
+            latest = response.json()['feed']['entry']
             if len(latest) == 0:
                 break
 
@@ -52,6 +58,26 @@ class Query(object):
             page += 1
 
         return results
+
+    def hits(self):
+        """
+        Returns the number of hits the current query will return. This is done by making a lightweight
+        query to CMR and inspecting the returned headers.
+
+        :returns: number of results reproted by CMR
+        """
+
+        url = self._build_url()
+
+        response = get(url, params={'page_size': 0}, verify=False)
+
+        try:
+            response.raise_for_status()
+        except exceptions.HTTPError as ex:
+            raise RuntimeError(ex.response.text)
+        
+        return int(response.headers["CMR-Hits"])
+
 
     def _urlencodestring(self, value):
         """

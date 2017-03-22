@@ -17,7 +17,7 @@ Getting access to NASA's earth science data is as simple as this:
 
     >>> api = GranuleQuery()
 
-    >>> granules = api.short_name("AST_L1T").point(42.5, -112.73).query()
+    >>> granules = api.short_name("AST_L1T").point(-112.73, 42.5).get(10)
 
     >>> for granule in granules:
     >>>   print(granule["entry_title"])
@@ -87,6 +87,15 @@ the wrapper. The following shows the possible parameters supported by the wrappe
     # filter by specific instrument or platform
     >>> api.instrument("MODIS")
     >>> api.platform("Terra")
+
+    # determine the number of results the query will return (without downloading all the granules)
+    >>> print(api.hits())
+
+    # retrieve 100 granules
+    >>> granules = api.get(100)
+
+    # retrieve 25,000 granules - this will make multiple API calls as only 2000 can be retrieved in one call
+    >>> granules = api.get(25000)
 
 
 Installation

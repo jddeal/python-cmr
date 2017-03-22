@@ -323,8 +323,19 @@ class TestGranuleClass(unittest.TestCase):
 
     def _test_get(self):
         """ Test real query """
+
         query = GranuleQuery()
         query.short_name('MCD43A4').version('005')
         query.temporal(datetime(2016, 1, 1), datetime(2016, 1, 1))
         results = query.get(limit=10)
+
         self.assertEqual(len(results), 10)
+    
+    def _test_hits(self):
+        """ integration test for hits() """
+
+        query = GranuleQuery()
+        query.short_name("AST_L1T").version("003").temporal("2016-10-26T01:30:00Z", "2016-10-26T01:40:00Z")
+        hits = query.hits()
+
+        self.assertEqual(hits, 3)
