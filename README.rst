@@ -89,7 +89,7 @@ the wrapper. The following shows the possible parameters supported by the wrappe
     >>> api.platform("Terra")
 
 
-To work with the inspecting and retreiving results from the API, the following methods are available:
+To inspect and retreive results from the API, the following methods are available:
 
 .. code-block:: python
 
