@@ -23,43 +23,72 @@ class Query(object):
         self.options = {}
         self.base_url = base_url
 
-    @classmethod
-    def get(cls, url, limit=100):
+    def get(self, limit=2000):
         """
-        Get all results up to some limit, even if spanning multiple pages
+        Get all results up to some limit, even if spanning multiple pages.
 
-        :param url: The complete URL to query
         :limit: The number of results to return
-        :returns: Results concatenated
+        :returns: query results as a list
         """
+
         page_size = min(limit, 2000)
+        url = self._build_url()
 
         results = []
         page = 1
         while len(results) < limit:
-            resp = get(url, params={'page_size': page_size, 'page_num': page})
+            
+            # cut page_size down if this is the last iteration and we need less than the
+            # full page_size of results to reach the limit
+            if limit - len(results) < page_size:
+                page_size = limit - len(results)
+
+            response = get(url, params={'page_size': page_size, 'page_num': page}, verify=False)
 
             try:
-                resp.raise_for_status()
+                response.raise_for_status()
             except exceptions.HTTPError as ex:
                 raise RuntimeError(ex.response.text)
-            latest = resp.json()['feed']['entry']
+
+            latest = response.json()['feed']['entry']
             if len(latest) == 0:
                 break
 
             results = results + latest
             page += 1
+
         return results
 
-    def _urlencodestring(self, value):
+    def hits(self):
         """
-        Returns a URL-Encoded version of the given value parameter.
+        Returns the number of hits the current query will return. This is done by making a lightweight
+        query to CMR and inspecting the returned headers.
 
-        :param value: value to encode
-        :returns: the URL encoded version of value
+        :returns: number of results reproted by CMR
         """
 
-        return quote(value)
+        url = self._build_url()
+
+        response = get(url, params={'page_size': 0}, verify=False)
+
+        try:
+            response.raise_for_status()
+        except exceptions.HTTPError as ex:
+            raise RuntimeError(ex.response.text)
+        
+        return int(response.headers["CMR-Hits"])
+    
+    def get_all(self):
+        """
+        Returns all of the results for the query. This will call hits() first to determine how many
+        results their are, and then calls get() with that number. This method could take quite
+        awhile if many requests have to be made.
+
+        :returns: query results as a list
+        """
+
+        return self.get(self.hits())
+
 
     def online_only(self, online_only):
         """
@@ -288,17 +317,17 @@ class Query(object):
         :returns: Query instance
         """
 
-        entry_title = self._urlencodestring(entry_title)
+        entry_title = quote(entry_title)
 
         self.params['entry_title'] = entry_title
 
         return self
 
-    def query(self, limit=100):
+    def _build_url(self):
         """
-        Queries the CMR and return the response as a dictionary.
+        Builds the URL that will be used to query CMR.
 
-        :returns: list of dictionaries, with each dictionary describing one granule
+        :returns: the url as a string
         """
 
         # last chance validation for parameters
@@ -339,10 +368,7 @@ class Query(object):
 
         options_as_string = "&".join(formatted_options)
 
-        url = "{}?{}&{}".format(self.base_url, params_as_string, options_as_string)
-        results = self.get(url, limit=limit)
-
-        return results
+        return "{}?{}&{}".format(self.base_url, params_as_string, options_as_string)
 
     def _valid_state(self):
         """
@@ -374,9 +400,7 @@ class GranuleQuery(Query):
         """
 
         if orbit2:
-            self.params['orbit_number'] = self._urlencodestring(
-                '{},{}'.format(str(orbit1), str(orbit2))
-            )
+            self.params['orbit_number'] = quote('{},{}'.format(str(orbit1), str(orbit2)))
         else:
             self.params['orbit_number'] = orbit1
 
