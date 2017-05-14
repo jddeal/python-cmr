@@ -40,8 +40,8 @@ class Query(object):
             
             # cut page_size down if this is the last iteration and we need less than the
             # full page_size of results to reach the limit
-            if limit - len(results) < page_size:
-                page_size = limit - len(results)
+            #if limit - len(results) < page_size:
+            #    page_size = limit - len(results)
 
             response = get(url, params={'page_size': page_size, 'page_num': page}, verify=False)
 
