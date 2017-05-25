@@ -9,7 +9,7 @@ Python CMR is an easy to use wrapper to the NASA EOSDIS
 querying the API intuitive and less error-prone by providing methods that will preemptively check
 for invalid input and handle the URL encoding the CMR API expects.
 
-Getting access to NASA's earth science data is as simple as this:
+Getting access to NASA's earth science metadata is as simple as this:
 
 ::
 
@@ -31,6 +31,25 @@ Getting access to NASA's earth science data is as simple as this:
     SC:AST_L1T.003:2150165250
     SC:AST_L1T.003:2150261715
     SC:AST_L1T.003:2150315169
+
+
+Installation
+============
+
+To install from pypi:
+
+::
+
+    $ pip install python-cmr
+
+
+To install from github, perhaps to try out the dev branch:
+
+::
+
+    $ git clone https://github.com/jddeal/python-cmr
+    $ cd python-cmr
+    $ pip install .
 
 
 Examples
@@ -104,16 +123,3 @@ To inspect and retreive results from the API, the following methods are availabl
 
     # retrieve all the granules possible for the query
     >>> granules = api.get_all()  # this is a shortcut for api.get(api.hits())
-
-
-Installation
-============
-
-Simply clone and install via pip.
-
-::
-
-    $ git clone https://github.com/jddeal/python-cmr
-    $ cd python-cmr
-    $ pip install .
-
