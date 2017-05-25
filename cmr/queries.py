@@ -37,7 +37,8 @@ class Query(object):
         results = []
         page = 1
         while len(results) < limit:
-            response = get(url, params={'page_size': page_size, 'page_num': page}, verify=False)
+
+            response = get(url, params={'page_size': page_size, 'page_num': page})
 
             try:
                 response.raise_for_status()
@@ -63,7 +64,7 @@ class Query(object):
 
         url = self._build_url()
 
-        response = get(url, params={'page_size': 0}, verify=False)
+        response = get(url, params={'page_size': 0})
 
         try:
             response.raise_for_status()

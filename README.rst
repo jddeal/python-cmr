@@ -9,9 +9,9 @@ Python CMR is an easy to use wrapper to the NASA EOSDIS
 querying the API intuitive and less error-prone by providing methods that will preemptively check
 for invalid input and handle the URL encoding the CMR API expects.
 
-Getting access to NASA's earth science data is as simple as this:
+Getting access to NASA's earth science metadata is as simple as this:
 
-.. code-block:: python
+::
 
     >>> from cmr import GranuleQuery
 
@@ -20,7 +20,7 @@ Getting access to NASA's earth science data is as simple as this:
     >>> granules = api.short_name("AST_L1T").point(-112.73, 42.5).get(10)
 
     >>> for granule in granules:
-    >>>   print(granule["entry_title"])
+    >>>   print(granule["title"])
     SC:AST_L1T.003:2149105822
     SC:AST_L1T.003:2149105820
     SC:AST_L1T.003:2149155037
@@ -33,13 +33,32 @@ Getting access to NASA's earth science data is as simple as this:
     SC:AST_L1T.003:2150315169
 
 
+Installation
+============
+
+To install from pypi:
+
+::
+
+    $ pip install python-cmr
+
+
+To install from github, perhaps to try out the dev branch:
+
+::
+
+    $ git clone https://github.com/jddeal/python-cmr
+    $ cd python-cmr
+    $ pip install .
+
+
 Examples
 ========
 
 The CMR API provides many parameters, but not all of them are covered by this version of
 the wrapper. The following shows the possible parameters supported by the wrapper:
 
-.. code-block:: python
+::
 
     >>> from cmr import GranuleQuery
 
@@ -91,7 +110,7 @@ the wrapper. The following shows the possible parameters supported by the wrappe
 
 To inspect and retreive results from the API, the following methods are available:
 
-.. code-block:: python
+::
 
     # inspect the number of results the query will return without downloading the results
     >>> print(api.hits())
@@ -104,16 +123,3 @@ To inspect and retreive results from the API, the following methods are availabl
 
     # retrieve all the granules possible for the query
     >>> granules = api.get_all()  # this is a shortcut for api.get(api.hits())
-
-
-Installation
-============
-
-Simply clone and install via pip.
-
-.. code-block:: bash
-
-    $ git clone https://github.com/jddeal/python-cmr
-    $ cd python-cmr
-    $ pip install .
-
