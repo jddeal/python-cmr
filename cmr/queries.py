@@ -16,6 +16,9 @@ class Query(object):
     """
 
     base_url = ""
+    CMR_OPS = "https://cmr.earthdata.nasa.gov/search/";
+    CMR_UAT = "https://cmr.uat.earthdata.nasa.gov/search/";
+    CMR_SIT = "https://cmr.sit.earthdata.nasa.gov/search/";
 
     def __init__(self, base_url):
         self.params = {}
@@ -336,8 +339,8 @@ class GranuleQuery(Query):
     Class for querying granules from the CMR.
     """
 
-    def __init__(self):
-        Query.__init__(self, "https://cmr.earthdata.nasa.gov/search/granules.json")
+    def __init__(self, mode=CMR_OPS):
+        Query.__init__(self, mode + "granules.json")
 
     def orbit_number(self, orbit1, orbit2=None):
         """"
@@ -464,8 +467,8 @@ class CollectionsQuery(Query):
     Class for querying collections from the CMR. Largely unimplemented.
     """
 
-    def __init__(self):
-        Query.__init__(self, "https://cmr.earthdata.nasa.gov/search/collections.json")
+    def __init__(self, mode=CMR_OPS):
+        Query.__init__(self, mode + "collections.json")
 
     def first_ten(self):
         """
