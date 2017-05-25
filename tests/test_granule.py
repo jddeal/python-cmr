@@ -1,7 +1,7 @@
 import unittest
 
 from datetime import datetime
-from cmr.queries import GranuleQuery
+from cmr.queries import GranuleQuery, CollectionQuery
 
 class TestGranuleClass(unittest.TestCase):
 
@@ -339,3 +339,14 @@ class TestGranuleClass(unittest.TestCase):
         hits = query.hits()
 
         self.assertEqual(hits, 3)
+
+
+class TestCollectionClass(unittest.TestCase):
+
+    def test_archive_center(self):
+        query = CollectionQuery()
+        query.archive_center("LP DAAC")
+
+        self.assertIn("archive_center", query.params)
+        self.assertEqual(query.params["archive_center"], "LP DAAC")
+    

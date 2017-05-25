@@ -502,22 +502,26 @@ class GranuleQuery(Query):
         return True
 
 
-class CollectionsQuery(Query):
+class CollectionQuery(Query):
     """
-    Class for querying collections from the CMR. Largely unimplemented.
+    Class for querying collections from the CMR.
     """
 
     def __init__(self):
         Query.__init__(self, "https://cmr.earthdata.nasa.gov/search/collections.json")
-
-    def first_ten(self):
+    
+    def archive_center(self, center):
         """
-        Returns the first 10 results from a basic CMR collection search.
+        Filter by the archive center that maintains the collection.
+
+        :param archive_center: name of center as a string
+        :returns: Query instance
         """
 
-        results = self.get(self.base_url, limit=10)
+        if center:
+            self.params['archive_center'] = center
 
-        return results
+        return self
 
     def _valid_state(self):
         return True
