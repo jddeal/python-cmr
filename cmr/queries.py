@@ -56,8 +56,8 @@ class Query(object):
 
     def hits(self):
         """
-        Returns the number of hits the current query will return. This is done by making a lightweight
-        query to CMR and inspecting the returned headers.
+        Returns the number of hits the current query will return. This is done by
+        making a lightweight query to CMR and inspecting the returned headers.
 
         :returns: number of results reproted by CMR
         """
@@ -70,9 +70,9 @@ class Query(object):
             response.raise_for_status()
         except exceptions.HTTPError as ex:
             raise RuntimeError(ex.response.text)
-        
+
         return int(response.headers["CMR-Hits"])
-    
+
     def get_all(self):
         """
         Returns all of the results for the query. This will call hits() first to determine how many
@@ -509,7 +509,7 @@ class CollectionQuery(Query):
 
     def __init__(self):
         Query.__init__(self, "https://cmr.earthdata.nasa.gov/search/collections.json")
-    
+
     def archive_center(self, center):
         """
         Filter by the archive center that maintains the collection.
