@@ -1,7 +1,7 @@
 import unittest
 
 from datetime import datetime
-from cmr.queries import GranuleQuery
+from cmr.queries import GranuleQuery, CMR_OPS
 
 class TestGranuleClass(unittest.TestCase):
 
@@ -340,6 +340,12 @@ class TestGranuleClass(unittest.TestCase):
 
         self.assertEqual(hits, 3)
 
+    def test_invalid_mode(self):
+        query = GranuleQuery()
 
+        with self.assertRaises(ValueError):
+            query.mode(None)
 
-    
+    def test_invalid_mode_constructor(self):
+        with self.assertRaises(ValueError):
+            query = GranuleQuery(None)
