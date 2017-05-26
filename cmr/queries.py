@@ -25,7 +25,7 @@ class Query(object):
     def __init__(self, route, mode=CMR_OPS):
         self.params = {}
         self.options = {}
-        _route = route
+        self._route = route
         self.mode(mode)
 
     def _urlencodestring(self, value):
