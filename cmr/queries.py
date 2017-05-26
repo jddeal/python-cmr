@@ -523,5 +523,20 @@ class CollectionQuery(Query):
 
         return self
 
+    def keyword(self, text):
+        """
+        Case insentive and wildcard (*) search through over two dozen fields in
+        a CMR collection record. This allows for searching against fields like
+        summary and science keywords.
+
+        :param text: text to search for
+        :returns: Query instance
+        """
+
+        if text:
+            self.params['keyword'] = text
+
+        return self
+
     def _valid_state(self):
         return True
