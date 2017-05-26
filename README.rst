@@ -100,7 +100,6 @@ Granule searches support these methods (in addition to the shared methods above)
 
     # search for a granule by its unique ID
     >>> api.granule_ur("SC:AST_L1T.003:2150315169")
-
     # search for granules from a specific orbit
     >>> api.orbit_number(5000)
 

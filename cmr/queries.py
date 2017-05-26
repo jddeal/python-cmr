@@ -89,7 +89,6 @@ class Query(object):
 
         return self.get(self.hits())
 
-
     def online_only(self, online_only):
         """
         Only match granules that are listed online and not available for download.
