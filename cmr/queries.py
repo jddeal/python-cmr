@@ -10,18 +10,23 @@ except ImportError:
 from datetime import datetime
 from requests import get, exceptions
 
+CMR_OPS = "https://cmr.earthdata.nasa.gov/search/"
+CMR_UAT = "https://cmr.uat.earthdata.nasa.gov/search/"
+CMR_SIT = "https://cmr.sit.earthdata.nasa.gov/search/"
 
 class Query(object):
     """
     Base class for all CMR queries.
     """
 
-    base_url = ""
+    _base_url = ""
+    _route = ""
 
-    def __init__(self, base_url):
+    def __init__(self, route, mode=CMR_OPS):
         self.params = {}
         self.options = {}
-        self.base_url = base_url
+        self._route = route
+        self.mode(mode)
 
     def get(self, limit=2000):
         """
@@ -375,14 +380,26 @@ class Query(object):
 
         raise NotImplementedError()
 
+    def mode(self, mode=CMR_OPS):
+        """
+        Sets the mode of the api target to the given URL
+        CMR_OPS, CMR_UAT, CMR_SIT are provided as class variables
+
+        :param mode: Mode to set the query to target
+        :throws: Will throw if provided None
+        """
+        if mode is None:
+            raise ValueError("Please provide a valid mode (CMR_OPS, CMR_UAT, CMR_SIT)")
+
+        self._base_url = str(mode) + self._route
 
 class GranuleQuery(Query):
     """
     Class for querying granules from the CMR.
     """
 
-    def __init__(self):
-        Query.__init__(self, "https://cmr.earthdata.nasa.gov/search/granules.json")
+    def __init__(self, mode=CMR_OPS):
+        Query.__init__(self, "granules.json", mode)
 
     def orbit_number(self, orbit1, orbit2=None):
         """"
@@ -507,8 +524,8 @@ class CollectionQuery(Query):
     Class for querying collections from the CMR.
     """
 
-    def __init__(self):
-        Query.__init__(self, "https://cmr.earthdata.nasa.gov/search/collections.json")
+    def __init__(self, mode=CMR_OPS):
+        Query.__init__(self, "collections.json", mode)
 
     def archive_center(self, center):
         """
