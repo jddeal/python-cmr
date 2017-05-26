@@ -368,7 +368,7 @@ class Query(object):
 
         options_as_string = "&".join(formatted_options)
 
-        return "{}?{}&{}".format(self.base_url, params_as_string, options_as_string)
+        return "{}?{}&{}".format(self._base_url, params_as_string, options_as_string)
 
     def _valid_state(self):
         """
