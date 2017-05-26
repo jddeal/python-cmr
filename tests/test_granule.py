@@ -339,3 +339,7 @@ class TestGranuleClass(unittest.TestCase):
         hits = query.hits()
 
         self.assertEqual(hits, 3)
+
+
+
+    
