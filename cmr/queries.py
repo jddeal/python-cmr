@@ -26,7 +26,7 @@ class Query(object):
         self.params = {}
         self.options = {}
         _route = route
-        mode(mode)
+        self.mode(mode)
 
     def _urlencodestring(self, value):
         """
