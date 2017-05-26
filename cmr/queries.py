@@ -15,16 +15,18 @@ class Query(object):
     Base class for all CMR queries.
     """
 
-    base_url = ""
+    _base_url = ""
     CMR_OPS = "https://cmr.earthdata.nasa.gov/search/";
     CMR_UAT = "https://cmr.uat.earthdata.nasa.gov/search/";
     CMR_SIT = "https://cmr.sit.earthdata.nasa.gov/search/";
+    _route = "";
 
-    def __init__(self, base_url):
+    def __init__(self, route, mode=CMR_OPS):
         self.params = {}
         self.options = {}
-        self.base_url = base_url
-
+        _route = route
+        mode(mode)
+    
     def _urlencodestring(self, value):
         """
         Returns a URL-Encoded version of the given value parameter.
@@ -313,7 +315,7 @@ class Query(object):
 
         options_as_string = "&".join(formatted_options)
 
-        url = "{}?{}&{}".format(self.base_url, params_as_string, options_as_string)
+        url = "{}?{}&{}".format(self._base_url, params_as_string, options_as_string)
         response = get(url)
 
         try:
@@ -333,6 +335,11 @@ class Query(object):
 
         raise NotImplementedError()
 
+    def mode(self, mode=CMR_OPS):
+        if mode is None:
+            raise ValueError("Please provide a valid mode (CMR_OPS, CMR_UAT, CMR_SIT)")
+        
+        _base_url = str(mode) + _route;
 
 class GranuleQuery(Query):
     """
@@ -340,7 +347,7 @@ class GranuleQuery(Query):
     """
 
     def __init__(self, mode=CMR_OPS):
-        Query.__init__(self, mode + "granules.json")
+        Query.__init__(self, "granules.json", mode)
 
     def orbit_number(self, orbit1, orbit2=None):
         """"
@@ -461,21 +468,20 @@ class GranuleQuery(Query):
         # all good then
         return True
 
-
 class CollectionsQuery(Query):
     """
     Class for querying collections from the CMR. Largely unimplemented.
     """
 
     def __init__(self, mode=CMR_OPS):
-        Query.__init__(self, mode + "collections.json")
+        Query.__init__(self, "collections.json", mode)
 
     def first_ten(self):
         """
         Returns the first 10 results from a basic CMR collection search.
         """
 
-        response = get(self.base_url)
+        response = get(self._base_url)
         collections = response.json()["feed"]["entry"]
 
         return collections

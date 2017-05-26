@@ -320,3 +320,12 @@ class TestGranuleClass(unittest.TestCase):
 
         query.point(1, 2).short_name("test")
         self.assertTrue(query._valid_state())
+
+    def test_invalid_mode(self):
+        query = GranuleQuery()
+
+        with self.assertRaises(ValueError):
+            query.mode(None)
+    def test_invalid_mode_constructor(self):
+        with self.assertRaises(ValueError):
+            query = GranuleQuery(None)
