@@ -349,3 +349,19 @@ class TestGranuleClass(unittest.TestCase):
     def test_invalid_mode_constructor(self):
         with self.assertRaises(ValueError):
             query = GranuleQuery(None)
+    
+    def test_valid_formats(self):
+        query = GranuleQuery()
+        formats = ["json", "xml", "echo10", "iso", "iso19115", "csv", "atom", "kml", "native"]
+
+        for _format in formats:
+            query.format(_format)
+            self.assertEqual(query._format, _format)
+    
+    def test_invalid_format(self):
+        query = GranuleQuery()
+
+        with self.assertRaises(ValueError):
+            query.format("invalid")
+            query.format("jsonn")
+            query.format("iso19116")
