@@ -8,6 +8,7 @@ except ImportError:
     from urllib import pathname2url as quote
 
 from datetime import datetime
+from inspect import getmembers, ismethod
 from requests import get, exceptions
 
 CMR_OPS = "https://cmr.earthdata.nasa.gov/search/"
@@ -88,6 +89,37 @@ class Query(object):
         """
 
         return self.get(self.hits())
+
+    def parameters(self, **kwargs):
+        """
+        Provide query parameters as keyword arguments. The keyword needs to match the name
+        of the method, and the value should either be the value or a tuple of values.
+
+        Example: parameters(short_name="AST_L1T", point=(42.5, -101.25))
+
+        :returns: Query instance
+        """
+
+        # build a dictionary of method names and their reference
+        methods = {}
+        for name, func in getmembers(self, predicate=ismethod):
+            methods[name] = func
+
+        for key, val in kwargs.items():
+
+            # verify the key matches one of our methods
+            if key not in methods:
+                raise ValueError("Unknown key {}".format(key))
+
+            # call the method
+            if isinstance(val, tuple):
+                methods[key](*val)
+            else:
+                methods[key](val)
+
+        return self
+
+
 
     def online_only(self, online_only):
         """

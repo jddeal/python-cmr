@@ -125,6 +125,22 @@ Collection searches support these methods (in addition to the shared methods abo
     >>> api.keyword("M*D09")
 
 
+As an alternative to chaining methods together to set the parameters of your query, a
+method exists to allow you to pass your parameters as keyword arguments:
+
+::
+
+    # search for AST_L1T version 003 granules at latitude 42, longitude -100
+    >>> api.parameters(
+        short_name="AST_L1T",
+        version="003",
+        point=(-100, 42)
+    )
+
+Note: the kwarg key should match the name of a method from the above examples, and the value
+should be a tuple if it's a parameter that requires multiple values.
+
+
 To inspect and retreive results from the API, the following methods are available:
 
 ::
