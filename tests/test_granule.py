@@ -349,3 +349,19 @@ class TestGranuleClass(unittest.TestCase):
     def test_invalid_mode_constructor(self):
         with self.assertRaises(ValueError):
             query = GranuleQuery(None)
+    
+    def test_valid_parameters(self):
+        query = GranuleQuery()
+
+        query.parameters(short_name="AST_L1T", version="003", point=(-100, 42))
+
+        self.assertEqual(query.params["short_name"], "AST_L1T")
+        self.assertEqual(query.params["version"], "003")
+        self.assertEqual(query.params["point"], "-100.0,42.0")
+    
+    def test_invalid_parameters(self):
+        query = GranuleQuery()
+
+        with self.assertRaises(ValueError):
+            query.parameters(fake=123)
+            query.parameters(point=(-100, "badvalue"))
