@@ -365,3 +365,19 @@ class TestGranuleClass(unittest.TestCase):
         with self.assertRaises(ValueError):
             query.parameters(fake=123)
             query.parameters(point=(-100, "badvalue"))
+
+    def test_valid_formats(self):
+        query = GranuleQuery()
+        formats = ["json", "xml", "echo10", "iso", "iso19115", "csv", "atom", "kml", "native"]
+
+        for _format in formats:
+            query.format(_format)
+            self.assertEqual(query._format, _format)
+    
+    def test_invalid_format(self):
+        query = GranuleQuery()
+
+        with self.assertRaises(ValueError):
+            query.format("invalid")
+            query.format("jsonn")
+            query.format("iso19116")

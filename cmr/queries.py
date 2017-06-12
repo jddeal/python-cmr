@@ -9,6 +9,7 @@ except ImportError:
 
 from datetime import datetime
 from inspect import getmembers, ismethod
+from re import search
 from requests import get, exceptions
 
 CMR_OPS = "https://cmr.earthdata.nasa.gov/search/"
@@ -22,6 +23,11 @@ class Query(object):
 
     _base_url = ""
     _route = ""
+    _format = "json"
+    _valid_formats_regex = [
+        "json", "xml", "echo10", "iso", "iso19115",
+        "csv", "atom", "kml", "native"
+    ]
 
     def __init__(self, route, mode=CMR_OPS):
         self.params = {}
@@ -51,11 +57,15 @@ class Query(object):
             except exceptions.HTTPError as ex:
                 raise RuntimeError(ex.response.text)
 
-            latest = response.json()['feed']['entry']
+            if self._format == "json":
+                latest = response.json()['feed']['entry']
+            else:
+                latest = response.text
+
             if len(latest) == 0:
                 break
 
-            results = results + latest
+            results.append(latest)
             page += 1
 
         return results
@@ -119,7 +129,25 @@ class Query(object):
 
         return self
 
+    def format(self, output_format="json"):
+        """
+        Sets the format for the returned results.
 
+        :param output_format: Preferred output format
+        :returns: Query instance
+        """
+
+        if not output_format:
+            output_format = "json"
+
+        # check requested format against the valid format regex's
+        for _format in self._valid_formats_regex:
+            if search(_format, output_format):
+                self._format = output_format
+                return self
+
+        # if we got here, we didn't find a matching format
+        raise ValueError("Unsupported format '{}'".format(output_format))
 
     def online_only(self, online_only):
         """
@@ -399,7 +427,12 @@ class Query(object):
 
         options_as_string = "&".join(formatted_options)
 
-        return "{}?{}&{}".format(self._base_url, params_as_string, options_as_string)
+        return "{}.{}?{}&{}".format(
+            self._base_url,
+            self._format,
+            params_as_string,
+            options_as_string
+        )
 
     def _valid_state(self):
         """
@@ -430,7 +463,7 @@ class GranuleQuery(Query):
     """
 
     def __init__(self, mode=CMR_OPS):
-        Query.__init__(self, "granules.json", mode)
+        Query.__init__(self, "granules", mode)
 
     def orbit_number(self, orbit1, orbit2=None):
         """"
@@ -556,7 +589,11 @@ class CollectionQuery(Query):
     """
 
     def __init__(self, mode=CMR_OPS):
-        Query.__init__(self, "collections.json", mode)
+        Query.__init__(self, "collections", mode)
+
+        self._valid_formats_regex.extend([
+            "dif", "dif10", "opendata", "umm_json", "umm_json_v[0-9]_[0-9]"
+        ])
 
     def archive_center(self, center):
         """
