@@ -103,30 +103,59 @@ class TestGranuleClass(unittest.TestCase):
 
     def test_online_only_set(self):
         query = GranuleQuery()
-        query.online_only(True)
 
+        # default to True
+        query.online_only()
         self.assertIn(self.online_only, query.params)
         self.assertEqual(query.params[self.online_only], True)
+
+        # explicitly set to False
+        query.online_only(False)
+
+        self.assertIn(self.online_only, query.params)
+        self.assertEqual(query.params[self.online_only], False)
 
     def test_online_only_invalid(self):
         query = GranuleQuery()
 
         with self.assertRaises(TypeError):
             query.online_only("Invalid Type")
+
         self.assertNotIn(self.online_only, query.params)
 
     def test_downloadable_set(self):
         query = GranuleQuery()
-        query.downloadable(True)
+
+        # default to True
+        query.downloadable()
 
         self.assertIn(self.downloadable, query.params)
         self.assertEqual(query.params[self.downloadable], True)
+
+        # explicitly set to False
+        query.downloadable(False)
+
+        self.assertIn(self.downloadable, query.params)
+        self.assertEqual(query.params[self.downloadable], False)
 
     def test_downloadable_invalid(self):
         query = GranuleQuery()
 
         with self.assertRaises(TypeError):
             query.downloadable("Invalid Type")
+        self.assertNotIn(self.downloadable, query.params)
+    
+    def test_flags_invalidate_the_other(self):
+        query = GranuleQuery()
+
+        # if downloadable is set, online_only should be unset
+        query.downloadable()
+        self.assertIn(self.downloadable, query.params)
+        self.assertNotIn(self.online_only, query.params)
+
+        # if online_only is set, downloadable should be unset
+        query.online_only()
+        self.assertIn(self.online_only, query.params)
         self.assertNotIn(self.downloadable, query.params)
 
     def test_entry_title_set(self):

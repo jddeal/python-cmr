@@ -149,7 +149,7 @@ class Query(object):
         # if we got here, we didn't find a matching format
         raise ValueError("Unsupported format '{}'".format(output_format))
 
-    def online_only(self, online_only):
+    def online_only(self, online_only=True):
         """
         Only match granules that are listed online and not available for download.
         The opposite of this method is downloadable().
@@ -160,6 +160,10 @@ class Query(object):
 
         if not isinstance(online_only, bool):
             raise TypeError("Online_only must be of type bool")
+
+        # remove the inverse flag so CMR doesn't crash
+        if "downloadable" in self.params:
+            del self.params["downloadable"]
 
         self.params['online_only'] = online_only
 
@@ -365,7 +369,7 @@ class Query(object):
 
         return self
 
-    def downloadable(self, downloadable):
+    def downloadable(self, downloadable=True):
         """
         Only match granules that are available for download. The opposite of this
         method is online_only().
@@ -373,9 +377,14 @@ class Query(object):
         :param downloadable: True to require granules be downloadable
         :returns: Query instance
         """
+
         if not isinstance(downloadable, bool):
             raise TypeError("Downloadable must be of type bool")
-
+        
+        # remove the inverse flag so CMR doesn't crash
+        if "online_only" in self.params:
+            del self.params["online_only"]
+        
         self.params['downloadable'] = downloadable
 
         return self
