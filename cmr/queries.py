@@ -283,6 +283,12 @@ class Query(object):
 
         if not coordinates:
             return self
+    
+        # make sure we were passed something iterable
+        try:
+            iter(coordinates)
+        except TypeError:
+            raise ValueError("A line must be an iterable of coordinate tuples. Ex: [(90,90), (91, 90), ...]")
 
         # polygon requires at least 4 pairs of coordinates
         if len(coordinates) < 4:
@@ -336,6 +342,12 @@ class Query(object):
 
         if not coordinates:
             return self
+        
+        # make sure we were passed something iterable
+        try:
+            iter(coordinates)
+        except TypeError:
+            raise ValueError("A line must be an iterable of coordinate tuples. Ex: [(90,90), (91, 90), ...]")
 
         # need at least 2 pairs of coordinates
         if len(coordinates) < 2:
