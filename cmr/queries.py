@@ -402,6 +402,8 @@ class Query(object):
             if isinstance(val, list):
                 for list_val in val:
                     formatted_params.append("{}[]={}".format(key, list_val))
+            elif isinstance(val, bool):
+                formatted_params.append("{}={}".format(key, str(val).lower()))
             else:
                 formatted_params.append("{}={}".format(key, val))
 

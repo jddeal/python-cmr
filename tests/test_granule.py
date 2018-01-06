@@ -381,3 +381,11 @@ class TestGranuleClass(unittest.TestCase):
             query.format("invalid")
             query.format("jsonn")
             query.format("iso19116")
+
+    def test_lowercase_bool_url(self):
+        query = GranuleQuery()
+        query.parameters(short_name="AST_LIT", online_only=True, downloadable=False)
+
+        url = query._build_url()
+        self.assertNotIn("True", url)
+        self.assertNotIn("False", url)
