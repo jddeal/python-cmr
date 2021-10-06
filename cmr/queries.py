@@ -380,7 +380,7 @@ class Query(object):
 
         if not isinstance(downloadable, bool):
             raise TypeError("Downloadable must be of type bool")
-        
+
         # remove the inverse flag so CMR doesn't crash
         if "online_only" in self.params:
             del self.params["online_only"]
@@ -683,7 +683,7 @@ class CollectionQuery(Query):
         for ID in IDs:
             if ID.strip()[0] != "C":
                 raise ValueError("Only collection concept ID's can be provided (begin with 'C'): {}".format(ID))
-        
+
         self.params["concept_id"] = IDs
 
         return self
@@ -700,7 +700,7 @@ class CollectionQuery(Query):
 
         if isinstance(IDs, str):
             IDs = [IDs]
-        
+
         # verify we provided with tool concept IDs
         for ID in IDs:
             if ID.strip()[0] != "T":
@@ -730,6 +730,164 @@ class CollectionQuery(Query):
         
         self.params["service_concept_id"] = IDs
 
+        return self
+
+    def _valid_state(self):
+        return True
+
+
+class ToolQuery(Query):
+    """
+    Class for querying tools from the CMR.
+    """
+
+    def __init__(self, mode=CMR_OPS):
+        Query.__init__(self, "tools", mode)
+
+        self._valid_formats_regex.extend([
+            "dif", "dif10", "opendata", "umm_json", "umm_json_v[0-9]_[0-9]"
+        ])
+
+    def get(self, limit=2000):
+        """
+        Get all results up to some limit, even if spanning multiple pages.
+
+        :limit: The number of results to return
+        :returns: query results as a list
+        """
+
+        page_size = min(limit, 2000)
+        url = self._build_url()
+
+        results = []
+        page = 1
+        while len(results) < limit:
+
+            response = get(url, params={'page_size': page_size, 'page_num': page})
+
+            try:
+                response.raise_for_status()
+            except exceptions.HTTPError as ex:
+                raise RuntimeError(ex.response.text)
+
+            if self._format == "json":
+                latest = response.json()['items']
+            else:
+                latest = [response.text]
+
+            if len(latest) == 0:
+                break
+
+            results.extend(latest)
+            page += 1
+
+        return results
+
+    def provider(self, provider):
+        """
+        Filter by provider.
+
+        :param provider: provider of tool.
+        :returns: Query instance
+        """
+
+        if not provider:
+            return self
+
+        self.params['provider'] = provider
+        return self
+
+    def native_id(self, native_id):
+        """
+        Filter by native id.
+
+        :param native_id: native id for tool
+        :returns: Query instance
+        """
+
+        if not native_id:
+            return self
+
+        self.params['native_id'] = native_id
+        return self
+
+    def _valid_state(self):
+        return True
+
+
+class ServiceQuery(Query):
+    """
+    Class for querying services from the CMR.
+    """
+
+    def __init__(self, mode=CMR_OPS):
+        Query.__init__(self, "services", mode)
+
+        self._valid_formats_regex.extend([
+            "dif", "dif10", "opendata", "umm_json", "umm_json_v[0-9]_[0-9]"
+        ])
+
+    def get(self, limit=2000):
+        """
+        Get all results up to some limit, even if spanning multiple pages.
+
+        :limit: The number of results to return
+        :returns: query results as a list
+        """
+
+        page_size = min(limit, 2000)
+        url = self._build_url()
+
+        results = []
+        page = 1
+        while len(results) < limit:
+
+            response = get(url, params={'page_size': page_size, 'page_num': page})
+
+            try:
+                response.raise_for_status()
+            except exceptions.HTTPError as ex:
+                raise RuntimeError(ex.response.text)
+
+            if self._format == "json":
+                latest = response.json()['items']
+            else:
+                latest = [response.text]
+
+            if len(latest) == 0:
+                break
+
+            results.extend(latest)
+            page += 1
+
+        return results
+
+    def provider(self, provider):
+        """
+        Filter by provider.
+
+        :param provider: provider of service.
+        :returns: Query instance
+        """
+
+        if not provider:
+            return self
+
+        self.params['provider'] = provider
+        return self
+
+    def native_id(self, native_id):
+        """
+        Filter by native id.
+
+        :param native_id: native id for service
+        :returns: Query instance
+        """
+
+        if not native_id:
+            return self
+
+        self.params['native_id'] = native_id
         return self
 
     def _valid_state(self):
