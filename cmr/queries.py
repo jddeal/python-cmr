@@ -688,5 +688,49 @@ class CollectionQuery(Query):
 
         return self
 
+    def tool_concept_id(self, IDs):
+        """
+        Filter collections associated with tool concept ID (ex: TL2092786348-POCLOUD)
+
+        Collections are associated with this tool ID.
+
+        :param IDs: tool concept ID(s) to search by. Can be provided as a string or list of strings.
+        :returns: Query instance
+        """
+
+        if isinstance(IDs, str):
+            IDs = [IDs]
+        
+        # verify we provided with tool concept IDs
+        for ID in IDs:
+            if ID.strip()[0] != "T":
+                raise ValueError("Only tool concept ID's can be provided (begin with 'C'): {}".format(ID))
+        
+        self.params["tool_concept_id"] = IDs
+
+        return self
+
+    def service_concept_id(self, IDs):
+        """
+        Filter collections associated with service ID (ex: S1962070864-POCLOUD)
+
+        Collections are associated with this service ID.
+
+        :param IDs: service concept ID(s) to search by. Can be provided as a string or list of strings.
+        :returns: Query instance
+        """
+
+        if isinstance(IDs, str):
+            IDs = [IDs]
+        
+        # verify we provided with service concept IDs
+        for ID in IDs:
+            if ID.strip()[0] != "S":
+                raise ValueError("Only service concept ID's can be provided (begin with 'C'): {}".format(ID))
+        
+        self.params["service_concept_id"] = IDs
+
+        return self
+
     def _valid_state(self):
         return True
