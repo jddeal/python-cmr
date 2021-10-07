@@ -34,7 +34,7 @@ class Query(object):
         self.options = {}
         self._route = route
         self.mode(mode)
-        self.concept_id_char = ''
+        self.concept_id_chars = []
 
     def get(self, limit=2000):
         """
@@ -478,8 +478,8 @@ class Query(object):
         
         # verify we weren't provided any granule concept IDs
         for ID in IDs:
-            if ID.strip()[0] != self.concept_id_char:
-                raise ValueError("Only concept ids that begin with '{}' can be provided: {}".format(self.concept_id_char, ID))
+            if ID.strip()[0] not in self.concept_id_chars:
+                raise ValueError("Only concept ids that begin with '{}' can be provided: {}".format(self.concept_id_chars, ID))
 
         self.params["concept_id"] = IDs
 
@@ -542,7 +542,7 @@ class GranuleQuery(Query):
 
     def __init__(self, mode=CMR_OPS):
         Query.__init__(self, "granules", mode)
-        self.concept_id_char = 'G'
+        self.concept_id_chars = ['G', 'C']
 
     def orbit_number(self, orbit1, orbit2=None):
         """"
@@ -669,7 +669,7 @@ class CollectionQuery(Query):
 
     def __init__(self, mode=CMR_OPS):
         Query.__init__(self, "collections", mode)
-        self.concept_id_char = 'C'
+        self.concept_id_chars = ['C']
         self._valid_formats_regex.extend([
             "dif", "dif10", "opendata", "umm_json", "umm_json_v[0-9]_[0-9]"
         ])
@@ -757,7 +757,7 @@ class ToolQuery(Query):
 
     def __init__(self, mode=CMR_OPS):
         Query.__init__(self, "tools", mode)
-        self.concept_id_char = 'T'
+        self.concept_id_chars = ['T']
         self._valid_formats_regex.extend([
             "dif", "dif10", "opendata", "umm_json", "umm_json_v[0-9]_[0-9]"
         ])
@@ -822,7 +822,7 @@ class ServiceQuery(Query):
 
     def __init__(self, mode=CMR_OPS):
         Query.__init__(self, "services", mode)
-        self.concept_id_char = 'S'
+        self.concept_id_chars = ['S']
         self._valid_formats_regex.extend([
             "dif", "dif10", "opendata", "umm_json", "umm_json_v[0-9]_[0-9]"
         ])
