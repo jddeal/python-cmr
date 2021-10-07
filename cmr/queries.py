@@ -34,6 +34,7 @@ class Query(object):
         self.options = {}
         self._route = route
         self.mode(mode)
+        self.concept_id_char = ''
 
     def get(self, limit=2000):
         """
@@ -458,6 +459,59 @@ class Query(object):
         res = res.rstrip('&')
         return res
 
+    def concept_id(self, IDs):
+        """
+        Filter by concept ID (ex: C1299783579-LPDAAC_ECS or G1327299284-LPDAAC_ECS, T12345678-LPDAAC_ECS, S12345678-LPDAAC_ECS)
+
+        Collections, granules, tools, services are uniquely identified with this ID. 
+        If providing a collection's concept ID here, it will filter by granules associated with that collection. 
+        If providing a granule's concept ID here, it will uniquely identify those granules.
+        If providing a tool's concept ID here, it will uniquely identify those tools.
+        If providing a service's concept ID here, it will uniquely identify those services.
+
+        :param IDs: concept ID(s) to search by. Can be provided as a string or list of strings.
+        :returns: Query instance
+        """
+
+        if isinstance(IDs, str):
+            IDs = [IDs]
+        
+        # verify we weren't provided any granule concept IDs
+        for ID in IDs:
+            if ID.strip()[0] != self.concept_id_char:
+                raise ValueError("Only concept ids that begin with '{}' can be provided: {}".format(self.concept_id_char, ID))
+
+        self.params["concept_id"] = IDs
+
+    def provider(self, provider):
+        """
+        Filter by provider.
+
+        :param provider: provider of tool.
+        :returns: Query instance
+        """
+
+        if not provider:
+            return self
+
+        self.params['provider'] = provider
+        return self
+
+    def native_id(self, native_ids):
+        """
+        Filter by native id.
+
+        :param native_id: native id for tool
+        :returns: Query instance
+        """
+
+        if isinstance(native_ids, str):
+            native_ids = [native_ids]
+        
+        self.params["native_id"] = native_ids
+
+        return self
+
     def _valid_state(self):
         """
         Determines if the Query is in a valid state based on the parameters and options
@@ -488,6 +542,7 @@ class GranuleQuery(Query):
 
     def __init__(self, mode=CMR_OPS):
         Query.__init__(self, "granules", mode)
+        self.concept_id_char = 'G'
 
     def orbit_number(self, orbit1, orbit2=None):
         """"
@@ -593,25 +648,6 @@ class GranuleQuery(Query):
         self.params['granule_ur'] = granule_ur
         return self
 
-    def concept_id(self, IDs):
-        """
-        Filter by concept ID (ex: C1299783579-LPDAAC_ECS or G1327299284-LPDAAC_ECS)
-
-        Collections and granules are uniquely identified with this ID. If providing a collection's concept ID
-        here, it will filter by granules associated with that collection. If providing a granule's concept ID
-        here, it will uniquely identify those granules.
-
-        :param IDs: concept ID(s) to search by. Can be provided as a string or list of strings.
-        :returns: Query instance
-        """
-
-        if isinstance(IDs, str):
-            IDs = [IDs]
-        
-        self.params["concept_id"] = IDs
-
-        return self
-
     def _valid_state(self):
 
         # spatial params must be paired with a collection limiting parameter
@@ -633,7 +669,7 @@ class CollectionQuery(Query):
 
     def __init__(self, mode=CMR_OPS):
         Query.__init__(self, "collections", mode)
-
+        self.concept_id_char = 'C'
         self._valid_formats_regex.extend([
             "dif", "dif10", "opendata", "umm_json", "umm_json_v[0-9]_[0-9]"
         ])
@@ -663,28 +699,6 @@ class CollectionQuery(Query):
 
         if text:
             self.params['keyword'] = text
-
-        return self
-
-    def concept_id(self, IDs):
-        """
-        Filter by concept ID (ex: C1299783579-LPDAAC_ECS)
-
-        Collections are uniquely identified with this ID.
-
-        :param IDs: concept ID(s) to search by. Can be provided as a string or list of strings.
-        :returns: Query instance
-        """
-
-        if isinstance(IDs, str):
-            IDs = [IDs]
-        
-        # verify we weren't provided any granule concept IDs
-        for ID in IDs:
-            if ID.strip()[0] != "C":
-                raise ValueError("Only collection concept ID's can be provided (begin with 'C'): {}".format(ID))
-
-        self.params["concept_id"] = IDs
 
         return self
 
@@ -743,7 +757,7 @@ class ToolQuery(Query):
 
     def __init__(self, mode=CMR_OPS):
         Query.__init__(self, "tools", mode)
-
+        self.concept_id_char = 'T'
         self._valid_formats_regex.extend([
             "dif", "dif10", "opendata", "umm_json", "umm_json_v[0-9]_[0-9]"
         ])
@@ -783,32 +797,18 @@ class ToolQuery(Query):
 
         return results
 
-    def provider(self, provider):
+    def name(self, name):
         """
-        Filter by provider.
+        Filter by name.
 
-        :param provider: provider of tool.
+        :param name: name of tool.
         :returns: Query instance
         """
 
-        if not provider:
+        if not name:
             return self
 
-        self.params['provider'] = provider
-        return self
-
-    def native_id(self, native_id):
-        """
-        Filter by native id.
-
-        :param native_id: native id for tool
-        :returns: Query instance
-        """
-
-        if not native_id:
-            return self
-
-        self.params['native_id'] = native_id
+        self.params['name'] = name
         return self
 
     def _valid_state(self):
@@ -822,7 +822,7 @@ class ServiceQuery(Query):
 
     def __init__(self, mode=CMR_OPS):
         Query.__init__(self, "services", mode)
-
+        self.concept_id_char = 'S'
         self._valid_formats_regex.extend([
             "dif", "dif10", "opendata", "umm_json", "umm_json_v[0-9]_[0-9]"
         ])
@@ -862,32 +862,18 @@ class ServiceQuery(Query):
 
         return results
 
-    def provider(self, provider):
+    def name(self, name):
         """
-        Filter by provider.
+        Filter by name.
 
-        :param provider: provider of service.
+        :param name: name of service.
         :returns: Query instance
         """
 
-        if not provider:
+        if not name:
             return self
 
-        self.params['provider'] = provider
-        return self
-
-    def native_id(self, native_id):
-        """
-        Filter by native id.
-
-        :param native_id: native id for service
-        :returns: Query instance
-        """
-
-        if not native_id:
-            return self
-
-        self.params['native_id'] = native_id
+        self.params['name'] = name
         return self
 
     def _valid_state(self):
