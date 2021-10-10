@@ -724,7 +724,7 @@ class CollectionQuery(GranuleCollectionBaseQuery):
         # verify we provided with tool concept IDs
         for ID in IDs:
             if ID.strip()[0] != "T":
-                raise ValueError("Only tool concept ID's can be provided (begin with 'C'): {}".format(ID))
+                raise ValueError("Only tool concept ID's can be provided (begin with 'T'): {}".format(ID))
         
         self.params["tool_concept_id"] = IDs
 
@@ -746,7 +746,7 @@ class CollectionQuery(GranuleCollectionBaseQuery):
         # verify we provided with service concept IDs
         for ID in IDs:
             if ID.strip()[0] != "S":
-                raise ValueError("Only service concept ID's can be provided (begin with 'C'): {}".format(ID))
+                raise ValueError("Only service concept ID's can be provided (begin with 'S'): {}".format(ID))
         
         self.params["service_concept_id"] = IDs
 
