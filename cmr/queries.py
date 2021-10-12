@@ -243,21 +243,6 @@ class Query(object):
         self.params['provider'] = provider
         return self
 
-    def native_id(self, native_ids):
-        """
-        Filter by native id.
-
-        :param native_id: native id for tool
-        :returns: Query instance
-        """
-
-        if isinstance(native_ids, str):
-            native_ids = [native_ids]
-        
-        self.params["native_id"] = native_ids
-
-        return self
-
     def _valid_state(self):
         """
         Determines if the Query is in a valid state based on the parameters and options
@@ -708,6 +693,21 @@ class CollectionQuery(GranuleCollectionBaseQuery):
 
         return self
 
+    def native_id(self, native_ids):
+        """
+        Filter by native id.
+
+        :param native_id: native id for collection
+        :returns: Query instance
+        """
+
+        if isinstance(native_ids, str):
+            native_ids = [native_ids]
+        
+        self.params["native_id"] = native_ids
+
+        return self
+
     def tool_concept_id(self, IDs):
         """
         Filter collections associated with tool concept ID (ex: TL2092786348-POCLOUD)
@@ -794,6 +794,21 @@ class ToolServiceBaseQuery(Query):
             page += 1
 
         return results
+
+    def native_id(self, native_ids):
+        """
+        Filter by native id.
+
+        :param native_id: native id for tool or service
+        :returns: Query instance
+        """
+
+        if isinstance(native_ids, str):
+            native_ids = [native_ids]
+        
+        self.params["native_id"] = native_ids
+
+        return self
 
     def name(self, name):
         """
