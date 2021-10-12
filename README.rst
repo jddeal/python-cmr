@@ -148,6 +148,7 @@ Collection searches support these methods (in addition to the shared methods abo
 Service searches support the following methods
 
 ::
+
     # Search via provider
     >>> api = ServiceQuery()
     >>> api.provider('POCLOUD')
@@ -160,6 +161,7 @@ Service searches support the following methods
 Tool searches support the following methods
 
 ::
+
     # Search via provider
     >>> api = ToolQuery()
     >>> api.provider('POCLOUD')
