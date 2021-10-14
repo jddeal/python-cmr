@@ -1,3 +1,9 @@
+Deprecation Notice
+==================
+This repo is no longer maintained. The last release published to PyPI from this repo was v0.4.1.
+
+For the latest development, issues, and pull requests, please see the projects new home: `NASA's python-cmr <https://github.com/nasa/python_cmr>`_.
+
 Python CMR
 ==========
 
